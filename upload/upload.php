@@ -56,17 +56,38 @@
             ?>
             <div class="col-sm-6">
                 <h2>List of Files Uploaded</h2>
-                <table class="table">
-                    <tr><th>Upload Date</th><th>File Name</th><th>Type</th></tr>
-                    <?php
-                    if($results !== FALSE) {
-                        while($row = $results->fetch_assoc()) {
-                            echo '<tr><td>' . $row['uploaddate'] . '</td><td>' . $row['filename'] . '</td><td>' . $row['type'] . '</td></tr>';
+                <form id="removeFiles" action="remove.php" method="POST">
+                    <table class="table">
+                        <tr><th></th><th>Upload Date</th><th>File Name</th><th>Type</th></tr>
+                        <?php
+                        if($results !== FALSE) {
+                            while($row = $results->fetch_assoc()) {
+                                echo '<tr><td><input type="checkbox" id="removeFile" data-file="' . $row['filename'] . '"></td><td>' . $row['uploaddate'] . '</td><td>' . $row['filename'] . '</td><td>' . $row['type'] . '</td></tr>';
+                            }
                         }
-                    }
-                    $mysqli->close();
-                    ?>
-                </table>
+                        $mysqli->close();
+                        ?>
+                    </table>
+                    <input type="hidden" name="files" id="files">
+                    <input type="submit" value="Remove" id="removeButton">
+                </form>
+            </div>
         </div>
+        <script>
+            $(document).ready(function() {
+                var fileList = [];
+                $("body").on('click', '#removeFile', function() {
+                    debugger;
+                    fileList.push($(this).data('file'));
+                });
+                $("#removeButton").click(function() {
+                    debugger;
+                //    event.preventDefault();
+                    document.getElementById("files").value = fileList;
+                    $("#removeFiles").submit();
+                });
+            });
+
+        </script>
     </body>
 </html>
