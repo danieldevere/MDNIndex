@@ -39,20 +39,23 @@ html, body {
     margin-bottom: 20px;
 }
 
-table.tablesorter thead tr th.headerSortUp:before,
-table.tablesorter thead tr th.headerSortDown:before,
-table.tablesorter thead tr th.header:before {
+table.tablesorter thead tr th.sort.headerSortUp:before,
+table.tablesorter thead tr th.sort.headerSortDown:before,
+table.tablesorter thead tr th.sort.header:before {
   font-family: FontAwesome;
 }
-table.tablesorter thead tr th.header:before {
+table.tablesorter thead tr th.sort.header:before {
   content: "\f0dc";
 }
-table.tablesorter thead tr th.headerSortUp:before {
+table.tablesorter thead tr th.sort.headerSortUp:before {
   content: "\f0dd";
 }
-table.tablesorter thead tr th.headerSortDown:before {
+table.tablesorter thead tr th.sort.headerSortDown:before {
   content: "\f0de";
 }
 #obitSearchSubmit {
     margin-top: 10px;
+}
+.sort {
+    cursor: pointer;
 }

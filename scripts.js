@@ -1,5 +1,118 @@
 $(document).ready(function() {
-    
+    // Class declarations
+
+    function Article(subject, headline, date, page, id) {
+        this.type = 'article';
+        this.subject = subject;
+        this.headline = headline;
+        this.date = date;
+        this.page = page;
+        this.print = false;
+        this.id = id;
+        this.tableRow = function(currentRow) {
+            var subjectName = this.subject;
+            if(subjectName.length > 20) {
+                subjectName = subjectName.substring(0,19) + '...';
+            }
+            var articleName = this.headline;
+            if(articleName.length > 50) {
+                articleName = articleName.substring(0, 49) + '...';
+            }
+            var string = '<tr><td>' + currentRow + '</td><td>' + subjectName + '</td><td>' + articleName + '</td><td>' + this.date + '</td><td>' + this.page + '</td><td><button type="button" class="print btn btn-default btn-xs" data-type="article" id="' + this.id + '">Add to Print</button></td></tr>';
+            return string;
+        }
+    }
+
+    function Obituary(lastname, firstname, birthdate, deathdate, obitdate, page, id) {
+        this.type = 'obituary';
+        this.lastname = lastname;
+        this.firstname = firstname;
+        this.birthdate = birthdate;
+        this.deathdate = deathdate;
+        this.obitdate = obitdate;
+        this.page = page;
+        this.print = false;
+        this.id = id;
+        this.tableRow = function(currentRow) {
+            var string = '<tr><td>' + currentRow + '</td><td>' + this.lastname + '</td><td>' + this.firstname + '</td><td>' + this.birthdate + '</td><td>' + this.deathdate + '</td><td>' + this.obitdate + '</td><td>' + this.page + '</td><td><button type="button" class="print btn btn-default btn-xs" data-type="obituary" id="' + this.id + '">Add to Print</button></td></tr>';
+            return string;        
+        }
+    }
+
+    function Wedding(lastname, firstname, announcement, weddingdate, articledate, page, id) {
+        this.type = 'wedding';
+        this.lastname = lastname;
+        this.firstname = firstname;
+        this.announcement = announcement;
+        this.weddingdate = weddingdate;
+        this.articledate = articledate;
+        this.page = page;
+        this.print = false;
+        this.id = id;
+        this.tableRow = function(currentRow) {
+            var string = '<tr><td>' + currentRow + '</td><td>' + this.lastname + '</td><td>' + this.firstname + '</td><td>' + this.announcement + '</td><td>' + this.weddingdate + '</td><td>' + this.articledate + '</td><td>' + this.page + '</td><td><button type="button" class="print btn btn-default btn-xs" data-type="wedding" id="' + this.id + '">Add to Print</button></td></tr>';
+            return string;          
+        }
+    }
+
+    function ArticleList() {
+        this.list = [];
+        this.headers = ['Subject', 'Headline', 'Date', 'Page'];
+        this.tableHead = function() {
+            var string = '<p>' + this.list.length.toLocaleString('en') + ' Results</p><table class="table tablesorter" id="myTable"><thead><tr><th class="sort"> No.</th><th class="sort"> Subject</th><th class="sort"> Headline</th><th class="sort"> Date</th><th class="sort"> Page</th><td class="sorter-false"><button type="button" id="printAllArticles" class="btn btn-primary btn-xs">Print All</button></td></tr></thead><tbody>';
+            return string;
+        }
+        this.tableFoot = '</tbody></table>';
+    }
+
+    function ObituaryList() {
+        this.list = [];
+        this.headers = ['Last Name', 'First Name', 'Birth Date', 'Death Date', 'Obituary Date', 'Page'];
+        this.tableHead = function() {
+            var string = '<p>' + this.list.length.toLocaleString('en') + ' Results</p><table class="table tablesorter" id="myTable"><thead><tr><th class="sort"> No.</th><th class="sort"> Last Name</th><th class="sort"> First Name</th><th class="sort"> Birth Date</th><th class="sort"> Death Date</th><th class="sort"> Obituary Date</th><th> Page</th><td class="sorter-false"><button type="button" id="printAllObits" class="btn btn-primary btn-xs">Print All</button></td></tr></thead><tbody>';
+            return string;                     
+        }
+        this.tableFoot = '</tbody></table>';
+    }
+
+    function WeddingList() {
+        this.list = [];
+        this.headers = ['Last Name', 'First Name', 'Announcement', 'Wedding Date', 'Article Date', 'Page'];
+        this.tableHead = function() {
+            var string = '<p>' + this.list.length.toLocaleString('en') + ' Results</p><table class="table tablesorter" id="myTable"><thead><tr><th class="sort"> No.</th><th class="sort"> Last Name</th><th class="sort"> First Name</th><th class="sort"> Announcement</th><th class="sort"> Wedding Date</th><th> Article Date</th><th> Page</th><td class="sorter-false"><button type="button" class="btn btn-primary btn-xs" id="printAllWeddings">Print All</button></td></tr></thead><tbody>';
+            return string;       
+        }
+        this.tableFoot = '</tbody></table>';
+    }
+
+    function PrintList() {
+        this.articleList = [];
+        this.obituaryList = [];
+        this.weddingList = [];
+        this.hasItems = function() {
+            if(this.articleList.length > 0 || this.weddingList.length > 0 || this.obituaryList.length > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        this.addPrint = function(item) {
+            this.hasItems = true;
+            if(item.type == 'article') {
+                this.articleList.push(item);
+            } else if(item.type == 'obituary') {
+                this.obituaryList.push(item);
+            } else {
+                this.weddingList.push(item);
+            }
+        }
+        this.clearPrints = function() {
+            this.hasItems = false;
+            this.articleList = [];
+            this.obituaryList = [];
+            this.weddingList = [];
+        }
+    }
     
     function Item(subject, id) {
         this.subject = subject;
@@ -10,7 +123,15 @@ $(document).ready(function() {
             return string;
         }
     }
+
+
+    // Global Construction
+    var articleList = new ArticleList();
+    var obituaryList = new ObituaryList();
+    var weddingList = new WeddingList();
+    var printList = new PrintList();
     var items = [];
+
     function getItems() {
         $.ajax({
             url: "subjects.php",
@@ -32,8 +153,58 @@ $(document).ready(function() {
     var item4 = new Item("Darth");
     var item5 = new Item("Dan");
     items.push(item1, item2, item3, item4, item5);*/
+
+    // Event Listeners
+
+    $("#printButton").click(function() {
+        if(printList.hasItems) {
+            var articleDataTest = [
+                {
+                    subject: 'Library',
+                    headline: 'Library',
+                    date: '01/01/1990',
+                    page: 'A1'
+                }
+            ];
+            document.getElementById("articleData").value = JSON.stringify(printList.articleList);
+            document.getElementById("obituaryData").value = JSON.stringify(printList.obituaryList);
+            document.getElementById("weddingData").value = JSON.stringify(printList.weddingList);
+      //      window.alert(JSON.stringify(printList.obituaryList));
+            $("#printForm").submit();
+
+        }
+    });
+    $("#resultsHere").on('click','.print:enabled', function() {
+        var addedPrint = $(this);
+        if(addedPrint.data('type') == 'article') {
+            var item = articleList.list[addedPrint.attr('id')];
+            printList.articleList.push(item);
+        } else if(addedPrint.data('type') == 'obituary') {
+            var item = obituaryList.list[addedPrint.attr('id')];
+            printList.obituaryList.push(item);
+        } else {
+            var item = weddingList.list[addedPrint.attr('id')];
+            printList.weddingList.push(item);            
+        }
+        addedPrint.addClass("disabled");
+    });
+    $("#resultsHere").on('click', '#printAllObits:enabled', function(){
+        printList.obituaryList = printList.obituaryList.concat(obituaryList.list);
+        $(this).addClass('disabled');
+        $('.print').addClass('disabled');
+    });
+    $("#resultsHere").on('click', '#printAllArticles:enabled', function(){
+        printList.articleList = printList.articleList.concat(articleList.list);
+        $(this).addClass('disabled');
+        $('.print').addClass('disabled');        
+    });
+    $("#resultsHere").on('click', '#printAllWeddings:enabled', function(){
+        printList.weddingList = printList.weddingList.concat(weddingList.list);
+        $(this).addClass('disabled');
+        $('.print').addClass('disabled');        
+    });
+
     $("#subject").keyup(function() {
-        //    debugger;
         if($(this).val() != "") {
             search($(this).val());
         } else {
@@ -128,7 +299,29 @@ $(document).ready(function() {
             dataType: 'json',
             data: data,
             success: function(data) {
+                var list = [];
+                var currentRow = 1;
+                var htmlString = '';
                 if($("#searchType").val() == 'obituaries') {
+                    for(x in data) {
+                        var obituary = new Obituary(data[x].lastname, data[x].firstname, data[x].birthdate, data[x].deathdate, data[x].obitdate, data[x].page, x);
+                        list.push(obituary);
+                        htmlString += obituary.tableRow(currentRow);
+                        currentRow++;
+                    }
+                    obituaryList.list = list;
+                    htmlString = obituaryList.tableHead() + htmlString + obituary.tableFoot;
+                } else {
+                    for(x in data) {
+                        var wedding = new Wedding(data[x].lastname, data[x].firstname, data[x].announcement, data[x].weddingdate, data[x].articledate, data[x].page, x);
+                        list.push(wedding);
+                        htmlString += wedding.tableRow(currentRow);
+                        currentRow++;
+                    }
+                    weddingList.list = list;
+                    htmlString = weddingList.tableHead() + htmlString + weddingList.tableFoot;
+                }
+/*                if($("#searchType").val() == 'obituaries') {
                     var htmlString = '<p>' + data.length.toLocaleString('en') + ' Results</p><table class="table tablesorter" id="myTable"><thead><tr><th class="header"> No.</th><th class="header"> Last Name</th><th class="header"> First Name</th><th class="header"> Birth Date</th><th class="header"> Death Date</th><th> Obituary Date</th><th> Page</th></tr><thead><tbody>';
                     var currentRow = 1;
                     for(x in data) {
@@ -144,7 +337,7 @@ $(document).ready(function() {
                     }
                 }
                 
-                htmlString += '</tbody></table>';
+                htmlString += '</tbody></table>';*/
                 document.getElementById("resultsHere").innerHTML = htmlString;
                 $("#resultsModal").modal('show');
                 $("#myTable").tablesorter(); 
@@ -178,27 +371,33 @@ $(document).ready(function() {
             toDate: toDate
         };
  //     window.alert(JSON.stringify(thisData));
-        debugger;
+    //    debugger;
         $.ajax({
             type: 'GET',
             url: 'news-search-api.php',
             dataType: 'json',
             data: thisData,
             success: function(data) {
-                var htmlString = '<p>' + data.length.toLocaleString('en') + ' Results</p><table class="table tablesorter" id="myTable"><thead><tr><th class="header"> No.</th><th class="header"> Subject</th><th class="header"> Headline</th><th class="header"> Date</th><th class="header"> Page</th></tr><thead><tbody>';
+                var htmlString = '';
                 var currentRow = 1;
+                var list = [];
                 for(x in data) {
-                    if(data[x].article.length > 50) {
-                        data[x].article = data[x].article.substring(0, 49) + '...';
-                    }
-                    htmlString += '<tr><td>' + currentRow + '</td><td>' + data[x].subject + '</td><td>' + data[x].article + '</td><td>' + data[x].articledate + '</td><td>' + data[x].page + '</td></tr>';
+                    var article = new Article(data[x].subject, data[x].article, data[x].articledate, data[x].page, x);
+                    list.push(article);
+                    htmlString += article.tableRow(currentRow);
                     currentRow++;
                 }
-                htmlString += '</tbody></table>';
+                articleList.list = list;
+                htmlString = articleList.tableHead() + htmlString + articleList.tableFoot;
                 document.getElementById("resultsHere").innerHTML = htmlString;
                 $("#resultsModal").modal('show');
-                $("#myTable").tablesorter(); 
-        //       window.alert(JSON.stringify(data));
+                $("#myTable").tablesorter({
+                    headers: {
+                        '.printAll' : {
+                            sorter: false
+                        }
+                    }
+                });
             },
             error: function(data) {
                 window.alert("You must enter search criteria");

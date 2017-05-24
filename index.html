@@ -35,8 +35,14 @@
                         <li><a href="http://www2.midland-mi.org/newspaper/MDNindex.htm" target="_blank">Raw Data</a></li>
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
-                        <li><a href="upload/upload.php" target="_blank">Upload Data</a></li>
+                        <li><a href="upload/upload.php">Upload Data</a></li>
+                        <li><a id="printButton">Print</a></li>
                     </ul>
+                    <form id="printForm" action="generatePDF.php" method="POST" target="_blank">
+                        <input type="hidden" id="articleData" name="articles">
+                        <input type="hidden" id="weddingData" name="weddings">
+                        <input type="hidden" id="obituaryData" name="obituaries">
+                    </form>
                 </div>
             </div>
         </nav>
