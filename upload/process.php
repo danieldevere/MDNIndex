@@ -67,6 +67,7 @@
 				deathdate DATE,
 				obitdate DATE NOT NULL,
 				page VARCHAR(10) NOT NULL,
+				id int NOT NULL AUTO_INCREMENT,
 				PRIMARY KEY(lastname, firstname, obitdate)
 			)";
 

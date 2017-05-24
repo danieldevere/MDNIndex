@@ -67,6 +67,7 @@
 				weddingdate DATE NOT NULL,
                 articledate DATE NOT NULL,
                 page VARCHAR(10),
+				id int NOT NULL AUTO_INCREMENT,
 				PRIMARY KEY(lastname, firstname, articledate)
 			)";
 

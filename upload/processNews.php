@@ -65,7 +65,9 @@
 				article VARCHAR(100) NOT NULL,
 				page VARCHAR(10),
 				articledate DATE NOT NULL,
-				PRIMARY KEY(subject, article, articledate)
+				id int NOT NULL AUTO_INCREMENT,
+				CONSTRAINT uc_article UNIQUE (subject, article, articledate),
+				PRIMARY KEY (id)
 			)";
 
 			if($mysqli->query($sql) === TRUE) {
