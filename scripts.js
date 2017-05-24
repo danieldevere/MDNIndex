@@ -185,13 +185,17 @@ $(document).ready(function() {
             dataType: 'json',
             data: thisData,
             success: function(data) {
-                var htmlString = '<p>' + data.length.toLocaleString('en') + ' Results</p><table class="table tablesorter" id="myTable"><thead><tr><th class="header"> No.</th><th class="header"> Subject</th><th class="header"> Headline</th><th class="header"> Date</th><th class="header"> Page</th></tr><thead><tbody>';
+                var htmlString = '<p>' + data.length.toLocaleString('en') + ' Results</p><table class="table tablesorter" id="myTable"><thead><tr><th class="header"> No.</th><th class="header"> Subject</th><th class="header"> Headline</th><th class="header"> Date</th><th class="header"> Page</th><td><button type="button" class="btn btn-primary btn-xs">Print All</button></td></tr><thead><tbody>';
                 var currentRow = 1;
                 for(x in data) {
+                    var articleName = data[x].article;
                     if(data[x].article.length > 50) {
                         data[x].article = data[x].article.substring(0, 49) + '...';
                     }
-                    htmlString += '<tr><td>' + currentRow + '</td><td>' + data[x].subject + '</td><td>' + data[x].article + '</td><td>' + data[x].articledate + '</td><td>' + data[x].page + '</td></tr>';
+                    if(data[x].subject.length > 20) {
+                        data[x].subject = data[x].subject.substring(0, 19) + '...';
+                    }
+                    htmlString += '<tr><td>' + currentRow + '</td><td>' + data[x].subject + '</td><td>' + data[x].article + '</td><td>' + data[x].articledate + '</td><td>' + data[x].page + '</td><td><button type="button" class="btn btn-default btn-xs">Add to Print</button></td></tr>';
                     currentRow++;
                 }
                 htmlString += '</tbody></table>';

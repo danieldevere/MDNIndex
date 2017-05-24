@@ -7,10 +7,10 @@ if(isset($_POST['headers'])) {
     $header = json_decode($_POST['headers']);
 }*/
 $data = array(
-    array('no' => '1', 'subject' => 'Accidents', 'headline' => 'Car Accidents', 'date' => '01/01/1990', 'page' => '1'),
-    array('no' => '2', 'subject' => 'Library', 'headline' => 'Grace A. Dow', 'date' => '02/02/2000', 'page' => '2')
+    array('subject' => 'Accidents', 'headline' => 'Car Accidents', 'date' => '01/01/1990', 'page' => '1'),
+    array('subject' => 'Library', 'headline' => 'Grace A. Dow', 'date' => '02/02/2000', 'page' => '2')
 );
-$header = array('No.', 'Subject', 'Headline', 'Date', 'Page');
+$header = array('Subject', 'Headline', 'Date', 'Page');
 class PDF extends FPDF
 {
     // Load data
@@ -41,23 +41,41 @@ class PDF extends FPDF
     }
 
     // Better table
-    function ImprovedTable($header, $data)
+    function NewsIndexTable($header, $data)
     {
-        // Column widths
-        $w = array(10, 35, 40, 45, 30);
-        // Header
-        for($i=0;$i<count($header);$i++)
-            $this->Cell($w[$i],7,$header[$i],1,0,'C');
+        // Table Title
+        $w = array(190);
+        // Title font style
+        $this->SetFont('','B', 20);
+        // Title
+        $this->Cell($w[0], 12, "News Articles", 1, 0, 'C');
         $this->Ln();
+        // Column widths
+        $w = array(50, 105, 20, 15);
+        // Set header font style
+        $this->SetFont('','', 16);
+        // Header cell styles
+        $this->SetFillColor(211,211,211);
+        // Header
+        for($i=0;$i<count($header);$i++) {
+            $this->Cell($w[$i],9,$header[$i],1,0,'C', true);
+        }
+        $this->Ln();
+        // Set table font style
+        $this->SetFont('', '', 10);
+        // Cell styles
+        $this->SetFillColor(232,232,232);
+        $height = 5;
         // Data
+        $fill = false;
         foreach($data as $row)
         {
-            $this->Cell($w[0],6,$row['no'],'LR');
-            $this->Cell($w[1],6,$row['subject'],'LR');
-            $this->Cell($w[2],6,$row['headline'],'LR');
-            $this->Cell($w[3],6,$row['date'],'LR');
-            $this->Cell($w[4],6,$row['page'],'LR');
+            $this->Cell($w[0],$height,$row['subject'],'1', 0, 'L', $fill);
+            $this->Cell($w[1],$height,$row['headline'],'1', 0, 'L', $fill);
+            $this->Cell($w[2],$height,$row['date'],'1', 0, 'C', $fill);
+            $this->Cell($w[3],$height,$row['page'],'1', 0, 'C', $fill);
             $this->Ln();
+            $fill = !$fill;
         }
         // Closing line
    //     $this->Cell(array_sum($w),0,'','T');
@@ -104,7 +122,7 @@ if(isset($header) && isset($data)) {
  //   $pdf->AddPage();
   //  $pdf->BasicTable($header,$data);
     $pdf->AddPage();
-    $pdf->ImprovedTable($header,$data);
+    $pdf->NewsIndexTable($header,$data);
 //    $pdf->AddPage();
  //   $pdf->FancyTable($header,$data);
     $pdf->Output();
