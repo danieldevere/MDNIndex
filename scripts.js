@@ -1,5 +1,68 @@
 $(document).ready(function() {
-    
+    // Class declarations
+
+    function Article(subject, headline, date, page) {
+        this.subject = subject;
+        this.headline = headline;
+        this.date = date;
+        this.page = page;
+        this.print = false;
+        this.tableRow = function(currentRow) {
+            var subjectName = this.subject;
+            if(subjectName.length > 20) {
+                subjectName = subjectName.substring(0,19) + '...';
+            }
+            var articleName = this.headline;
+            if(articleName.length > 50) {
+                articleName = articleName.substring(0, 49) + '...';
+            }
+            var string = '<tr><td>' + currentRow + '</td><td>' + subjectName + '</td><td>' + articleName + '</td><td>' + this.date + '</td><td>' + this.page + '</td><td><button type="button" class="btn btn-default btn-xs" data-article ="' + this + '">Add to Print</button></td></tr>';
+            return string;
+        }
+    }
+
+    function Obituary(lastname, firstname, birthdate, deathdate, obitdate, page) {
+        this.lastname = lastname;
+        this.firstname = firstname;
+        this.birthdate = birthdate;
+        this.deathdate = deathdate;
+        this.obitdate = obitdate;
+        this.page = page;
+        this.print = false;
+    }
+
+    function Wedding(lastname, firstname, announcement, weddingdate, articledate, page) {
+        this.lastname = lastname;
+        this.firstname = firstname;
+        this.announcement = announcement;
+        this.weddingdate = weddingdate;
+        this.articledate = articledate;
+        this.page = page;
+        this.print = false;
+        this.tableRow = function() {
+            var string = '';
+        }
+    }
+
+    function ArticleList() {
+        this.list = [];
+        this.headers = ['Subject', 'Headline', 'Date', 'Page'];
+        this.tableHead = function() {
+            var string = '<p>' + this.list.length.toLocaleString('en') + ' Results</p><table class="table tablesorter" id="myTable"><thead><tr><th class="header"> No.</th><th class="header"> Subject</th><th class="header"> Headline</th><th class="header"> Date</th><th class="header"> Page</th><td><button type="button" id="printAllArticles" class="btn btn-primary btn-xs">Print All</button></td></tr><thead><tbody>';
+            return string;
+        }
+        this.tableFoot = '</tbody></table>';
+    }
+
+    function ObituaryList() {
+        this.list = [];
+        this.headers = ['Last Name', 'First Name', 'Birth Date', 'Death Date', 'Obituary Date', 'Page'];
+    }
+
+    function WeddingList() {
+        this.list = [];
+        this.headers = ['Last Name', 'First Name', 'Announcement', 'Wedding Date', 'Article Date', 'Page'];
+    }
     
     function Item(subject, id) {
         this.subject = subject;
@@ -10,7 +73,14 @@ $(document).ready(function() {
             return string;
         }
     }
+
+
+    // Global Construction
+    var articleList = new ArticleList();
+    var obituaryList = new ObituaryList();
+    var weddingList = new WeddingList();
     var items = [];
+
     function getItems() {
         $.ajax({
             url: "subjects.php",
@@ -128,6 +198,10 @@ $(document).ready(function() {
             dataType: 'json',
             data: data,
             success: function(data) {
+                var list = [];
+                if($("#searchType").val() == 'obituaries') {
+
+                }
                 if($("#searchType").val() == 'obituaries') {
                     var htmlString = '<p>' + data.length.toLocaleString('en') + ' Results</p><table class="table tablesorter" id="myTable"><thead><tr><th class="header"> No.</th><th class="header"> Last Name</th><th class="header"> First Name</th><th class="header"> Birth Date</th><th class="header"> Death Date</th><th> Obituary Date</th><th> Page</th></tr><thead><tbody>';
                     var currentRow = 1;
@@ -185,24 +259,20 @@ $(document).ready(function() {
             dataType: 'json',
             data: thisData,
             success: function(data) {
-                var htmlString = '<p>' + data.length.toLocaleString('en') + ' Results</p><table class="table tablesorter" id="myTable"><thead><tr><th class="header"> No.</th><th class="header"> Subject</th><th class="header"> Headline</th><th class="header"> Date</th><th class="header"> Page</th><td><button type="button" class="btn btn-primary btn-xs">Print All</button></td></tr><thead><tbody>';
+                var htmlString = '';
                 var currentRow = 1;
+                var list = [];
                 for(x in data) {
-                    var articleName = data[x].article;
-                    if(data[x].article.length > 50) {
-                        data[x].article = data[x].article.substring(0, 49) + '...';
-                    }
-                    if(data[x].subject.length > 20) {
-                        data[x].subject = data[x].subject.substring(0, 19) + '...';
-                    }
-                    htmlString += '<tr><td>' + currentRow + '</td><td>' + data[x].subject + '</td><td>' + data[x].article + '</td><td>' + data[x].articledate + '</td><td>' + data[x].page + '</td><td><button type="button" class="btn btn-default btn-xs">Add to Print</button></td></tr>';
+                    var article = new Article(data[x].subject, data[x].article, data[x].articledate, data[x].page);
+                    list.push(article);
+                    htmlString += article.tableRow(currentRow);
                     currentRow++;
                 }
-                htmlString += '</tbody></table>';
+                articleList.list = list;
+                htmlString = articleList.tableHead() + htmlString + articleList.tableFoot;
                 document.getElementById("resultsHere").innerHTML = htmlString;
                 $("#resultsModal").modal('show');
-                $("#myTable").tablesorter(); 
-        //       window.alert(JSON.stringify(data));
+                $("#myTable").tablesorter();
             },
             error: function(data) {
                 window.alert("You must enter search criteria");
