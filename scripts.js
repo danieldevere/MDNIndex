@@ -8,7 +8,7 @@ $(document).ready(function() {
         this.date = date;
         this.page = page;
         this.printed = function() {
-            debugger;
+          //  debugger;
             return printList.isPrinting(this.type, this.id);
         }
         this.index = -1;
@@ -162,7 +162,7 @@ $(document).ready(function() {
             this.weddingList = [];
         }
         this.isPrinting = function(type, item) {
-            debugger;
+        //    debugger;
             if(type == 'article') {
                 if(this.articleList.length > 0) {
                     if(this.articleList.findIndex(findItem) != -1) {
@@ -196,6 +196,41 @@ $(document).ready(function() {
             }
             function findItem(find) {
                 return find.id == item;
+            }
+        }
+        this.sortLists = function() {
+            this.articleList.sort(sortArticles);
+            this.weddingList.sort(sortPersonal);
+            this.obituaryList.sort(sortPersonal);
+            function sortArticles(a, b) {
+                if(a.subject.toUpperCase() == b.subject.toUpperCase()) {
+                    if(a.date < a.date) {
+                        return -1;
+                    } else {
+                        return 1;
+                    }
+                } else {
+                    if(a.subject.toUpperCase() < b.subject.toUpperCase()) {
+                        return -1;
+                    } else {
+                        return 1;
+                    }
+                }
+            }
+            function sortPersonal(a, b) {
+                if(a.lastname.toUpperCase() == b.lastname.toUpperCase()) {
+                    if(a.firstname.toUpperCase() < b.firstname.toUpperCase()) {
+                        return -1;
+                    } else {
+                        return 1;
+                    }
+                } else {
+                    if(a.lastname.toUpperCase() < b.lastname.toUpperCase()) {
+                        return -1;
+                    } else {
+                        return 1;
+                    }
+                }
             }
         }
     }
@@ -252,6 +287,8 @@ $(document).ready(function() {
                     page: 'A1'
                 }
             ];
+            debugger;
+            printList.sortLists();
             document.getElementById("articleData").value = JSON.stringify(printList.articleList);
             document.getElementById("obituaryData").value = JSON.stringify(printList.obituaryList);
             document.getElementById("weddingData").value = JSON.stringify(printList.weddingList);
@@ -261,7 +298,7 @@ $(document).ready(function() {
         }
     });
     $("#resultsHere").on('click','.print:enabled', function() {
-        debugger;
+      //  debugger;
         var addedPrint = $(this);
         if(addedPrint.data('type') == 'article') {
             var item = articleList.list[addedPrint.attr('id')];
@@ -403,9 +440,11 @@ $(document).ready(function() {
             dataType: 'json',
             data: data,
             success: function(data) {
+                
                 var currentRow = 1;
                 var htmlString = '';
                 if($("#searchType").val() == 'obituaries') {
+                    obituaryList = new ObituaryList();
                     for(x in data) {
                         var obituary = new Obituary(data[x].lastname, data[x].firstname, data[x].birthdate, data[x].deathdate, data[x].obitdate, data[x].page, data[x].id);
                         obituaryList.addItem(obituary);
@@ -414,6 +453,7 @@ $(document).ready(function() {
                     }
                     htmlString = obituaryList.tableHead() + htmlString + obituary.tableFoot;
                 } else {
+                    weddingList = new WeddingList();
                     for(x in data) {
                         var wedding = new Wedding(data[x].lastname, data[x].firstname, data[x].announcement, data[x].weddingdate, data[x].articledate, data[x].page, data[x].id);
                         weddingList.addItem(wedding);
@@ -479,6 +519,7 @@ $(document).ready(function() {
             dataType: 'json',
             data: thisData,
             success: function(data) {
+                articleList = new ArticleList();
                 var htmlString = '';
                 var currentRow = 1;
                 for(x in data) {

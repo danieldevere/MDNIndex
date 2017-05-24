@@ -52,6 +52,7 @@
 				id INT NOT NULL AUTO_INCREMENT,
 				type VARCHAR(50) NOT NULL,
 				uploaddate DATETIME DEFAULT CURRENT_TIMESTAMP,
+				CONSTRAINT uc_file UNIQUE (filename, type),
 				PRIMARY KEY (id)
 			)";
 			if($mysqli->query($something) === TRUE) {
