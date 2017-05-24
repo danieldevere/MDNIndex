@@ -68,7 +68,8 @@
                 articledate DATE NOT NULL,
                 page VARCHAR(10),
 				id int NOT NULL AUTO_INCREMENT,
-				PRIMARY KEY(lastname, firstname, articledate)
+				CONSTRAINT uc_wedding UNIQUE (lastname, firstname, articledate),
+				PRIMARY KEY (id)
 			)";
 
 			if($mysqli->query($sql) === TRUE) {

@@ -8,6 +8,7 @@ $(document).ready(function() {
         this.date = date;
         this.page = page;
         this.printed = function() {
+            debugger;
             return printList.isPrinting(this.type, this.id);
         }
         this.index = -1;
@@ -25,7 +26,7 @@ $(document).ready(function() {
             if(this.printed()) {
                 disabled = 'disabled';
             }
-            var string = '<tr><td>' + currentRow + '</td><td>' + subjectName + '</td><td>' + articleName + '</td><td>' + this.date + '</td><td>' + this.page + '</td><td><button type="button" class="print btn btn-default btn-xs ' + disabled + '" data-type="article" id="' + this.id + '">Add to Print</button></td></tr>';
+            var string = '<tr><td>' + currentRow + '</td><td>' + subjectName + '</td><td>' + articleName + '</td><td>' + this.date + '</td><td>' + this.page + '</td><td><button type="button" class="print btn btn-default btn-xs ' + disabled + '" data-type="article" id="' + this.index + '">Add to Print</button></td></tr>';
             return string;
         }
     }
@@ -48,7 +49,7 @@ $(document).ready(function() {
             if(this.printed()) {
                 disabled = 'disabled';
             }
-            var string = '<tr><td>' + currentRow + '</td><td>' + this.lastname + '</td><td>' + this.firstname + '</td><td>' + this.birthdate + '</td><td>' + this.deathdate + '</td><td>' + this.obitdate + '</td><td>' + this.page + '</td><td><button type="button" class="print btn btn-default btn-xs ' + disabled + '" data-type="obituary" id="' + this.id + '">Add to Print</button></td></tr>';
+            var string = '<tr><td>' + currentRow + '</td><td>' + this.lastname + '</td><td>' + this.firstname + '</td><td>' + this.birthdate + '</td><td>' + this.deathdate + '</td><td>' + this.obitdate + '</td><td>' + this.page + '</td><td><button type="button" class="print btn btn-default btn-xs ' + disabled + '" data-type="obituary" id="' + this.index + '">Add to Print</button></td></tr>';
             return string;        
         }
     }
@@ -71,7 +72,7 @@ $(document).ready(function() {
             if(this.printed()) {
                 disabled = 'disabled';
             }
-            var string = '<tr><td>' + currentRow + '</td><td>' + this.lastname + '</td><td>' + this.firstname + '</td><td>' + this.announcement + '</td><td>' + this.weddingdate + '</td><td>' + this.articledate + '</td><td>' + this.page + '</td><td><button type="button" class="print btn btn-default btn-xs ' + disabled + '" data-type="wedding" id="' + this.id + '">Add to Print</button></td></tr>';
+            var string = '<tr><td>' + currentRow + '</td><td>' + this.lastname + '</td><td>' + this.firstname + '</td><td>' + this.announcement + '</td><td>' + this.weddingdate + '</td><td>' + this.articledate + '</td><td>' + this.page + '</td><td><button type="button" class="print btn btn-default btn-xs ' + disabled + '" data-type="wedding" id="' + this.index + '">Add to Print</button></td></tr>';
             return string;          
         }
     }
@@ -151,7 +152,7 @@ $(document).ready(function() {
                 }
             }
             function findItem(find) {
-                return find.id == item;
+                return find.id == item.id;
             }
         }
         this.clearPrints = function() {
@@ -161,6 +162,7 @@ $(document).ready(function() {
             this.weddingList = [];
         }
         this.isPrinting = function(type, item) {
+            debugger;
             if(type == 'article') {
                 if(this.articleList.length > 0) {
                     if(this.articleList.findIndex(findItem) != -1) {
@@ -193,7 +195,7 @@ $(document).ready(function() {
                 }
             }
             function findItem(find) {
-                return find == item;
+                return find.id == item;
             }
         }
     }
@@ -259,6 +261,7 @@ $(document).ready(function() {
         }
     });
     $("#resultsHere").on('click','.print:enabled', function() {
+        debugger;
         var addedPrint = $(this);
         if(addedPrint.data('type') == 'article') {
             var item = articleList.list[addedPrint.attr('id')];

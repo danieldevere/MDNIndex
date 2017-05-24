@@ -68,7 +68,8 @@
 				obitdate DATE NOT NULL,
 				page VARCHAR(10) NOT NULL,
 				id int NOT NULL AUTO_INCREMENT,
-				PRIMARY KEY(lastname, firstname, obitdate)
+				CONSTRAINT uc_obituary UNIQUE (lastname, firstname, obitdate),
+				PRIMARY KEY (id)
 			)";
 
 			if($mysqli->query($sql) === TRUE) {
