@@ -10,11 +10,11 @@
         $files = json_decode($_POST['files']);
     }
     for($j=0;$j<count($files);$j++) {
-        $currentdir = getcwd();  
+        $currentdir = getcwd();
         $target = $currentdir . '/uploads/' . $files[$j]->name . '.csv';
         if(($handle = fopen($target, "r")) !== FALSE) {
         //    echo 'before prepare';
-            if($files[$j]->type == 'Obituaries') {
+            if($files[$j]->type == 'Obituary') {
                 $stmt = $mysqli->prepare("DELETE FROM Obituaries WHERE lastname=? AND firstname=? AND birthdate=? AND deathdate=? AND obitdate=? AND page=?");
                 $stmt->bind_param("ssssss", $lastname, $firstname, $birthdate, $deathdate, $obitdate, $page);
                 $lastnameReached = false;
@@ -43,24 +43,67 @@
                         $lastnameReached = true;
                     }
                 }
-            } elseif()
-
+            } elseif($files[$j]->type == 'Article') {
+                $stmt = $mysqli->prepare("DELETE FROM News WHERE subject=? AND article=? AND page=? AND articledate=?");
+                $stmt->bind_param("ssss", $subject, $article, $page, $articledate);
+                $subjectReached = false;
+				while (($data = fgetcsv($handle, ',')) !== FALSE) {
+					if($subjectReached && $data[0] != "") {
+						for($c=0; $c < 4; $c++) {
+							$data[$c] = str_replace('"', '', $data[$c]);
+							$data[$c] = str_replace("'", "", $data[$c]);
+							if($c < 1) {
+								$data[$c] = str_replace('-', ' - ', $data[$c]);
+							}
+						}	
+						$subject = $data[0];
+						$article = $data[1];
+						$page = $data[2];
+						$articledate = date("Y-m-d", strtotime($data[3]));
+					//	$year = $data[4];
+						$stmt->execute();
+					}
+					if(strcasecmp($data[0], 'subject') == 0) {
+						$subjectReached = true;
+					}
+				}
+            } else {
+                $stmt = $mysqli->prepare("DELETE FROM Weddings WHERE lastname=? AND firstname=? AND announcement=? AND weddingdate=? AND articledate=? AND page=?");
+				$stmt->bind_param("ssssss", $lastname, $firstname, $announcement, $weddingdate, $articledate, $page);
+				$lastNameReached = false;
+				while (($data = fgetcsv($handle, ',')) !== FALSE) {
+					if($lastNameReached && $data[0] != "") {
+						for($c=0; $c < 6; $c++) {
+							$data[$c] = str_replace('"', '', $data[$c]);
+							$data[$c] = str_replace("'", "", $data[$c]);
+						}	
+						$lastname = $data[0];
+						$firstname = $data[1];
+						$announcement = $data[2];
+						$weddingdate = date("Y-m-d", strtotime($data[3]));
+                        $articledate = date("Y-m-d", strtotime($data[4]));
+                        $page = $data[5];
+					//	$year = $data[4];
+						$stmt->execute();
+					}
+					if(strcasecmp($data[0], 'last name') == 0) {
+						$lastNameReached = true;
+					}
+				}
+            }
+            fclose($handle);
+            ini_set('auto_detect_line_endings', FALSE);
         } else {
             echo "There was an error opening the file.";
         }
-        fclose($handle);
-        ini_set('auto_detect_line_endings', FALSE);
         $filestmt = $mysqli->prepare("DELETE FROM Files WHERE filename = ?");
         $filestmt->bind_param("s", $name);
-        $name = $fileArray[$i];
-        $filestmt->execute();
-       
-    }
-   // echo $fileName;
-    $fileArray = explode(',', $fileName);
- //   echo $fileArray[0];
-    for($i = 0; $i < count($fileArray); $i++) {
-    
+        $name = $files[$j]->name;
+        if($filestmt->execute()) {
+            echo 'Success';
+        } else {
+            echo 'Error';
+        }
     }
     $mysqli->close();
 

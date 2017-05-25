@@ -10,6 +10,7 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
         <!-- Latest compiled and minified JavaScript -->
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+        <script src="upload.js"></script>
     </head>
     <body>
         <nav class="navbar navbar-default">
@@ -45,53 +46,12 @@
                     <button type="submit" class="btn btn-default">Upload</button>
                 </form>
             </div>
-            <?php
-            $mysqli = mysqli_connect('localhost', 'root', '', 'obits2');
-            if($mysqli->connect_errno) {
-				echo "Connect failed" . $mysqli->connect_error;
-				echo "<script type='text/javascript'>alert('there was a problem connecting');</script>";
-			}
-            $searchString = 'SELECT * FROM Files ORDER BY uploaddate DESC';
-            $results = $mysqli->query($searchString);
-            ?>
             <div class="col-sm-6">
                 <h2>List of Files Uploaded</h2>
-                <form id="removeFiles" action="remove.php" method="POST">
-                    <table class="table">
-                        <tr><th></th><th>Upload Date</th><th>File Name</th><th>Type</th></tr>
-                        <?php
-                        if($results !== FALSE) {
-                            while($row = $results->fetch_assoc()) {
-                                echo '<tr><td><input type="checkbox" id="removeFile" data-type="' . $row['type'] . '" data-file="' . $row['filename'] . '"></td><td>' . $row['uploaddate'] . '</td><td>' . $row['filename'] . '</td><td>' . $row['type'] . '</td></tr>';
-                            }
-                        }
-                        $mysqli->close();
-                        ?>
+                    <table class="table" id="filesTable">
                     </table>
-                    <input type="hidden" name="files" id="files">
-                    <input type="submit" value="Remove" id="removeButton">
-                </form>
+                    <button type="button" class="btn btn-default" id="removeButton">Remove</button>
             </div>
         </div>
-        <script>
-            $(document).ready(function() {
-                var fileList = [];
-                $("body").on('click', '#removeFile', function() {
-                    debugger;
-                    var file = {
-                        name: $(this).data('file'),
-                        type: $(this).data('type')
-                    };
-                    fileList.push(file);
-                });
-                $("#removeButton").click(function() {
-                    debugger;
-                //    event.preventDefault();
-                    document.getElementById("files").value = JSON.stringify(fileList);
-                    $("#removeFiles").submit();
-                });
-            });
-
-        </script>
     </body>
 </html>
