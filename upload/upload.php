@@ -62,7 +62,7 @@
                         <?php
                         if($results !== FALSE) {
                             while($row = $results->fetch_assoc()) {
-                                echo '<tr><td><input type="checkbox" id="removeFile" data-file="' . $row['filename'] . '"></td><td>' . $row['uploaddate'] . '</td><td>' . $row['filename'] . '</td><td>' . $row['type'] . '</td></tr>';
+                                echo '<tr><td><input type="checkbox" id="removeFile" data-type="' . $row['type'] . '" data-file="' . $row['filename'] . '"></td><td>' . $row['uploaddate'] . '</td><td>' . $row['filename'] . '</td><td>' . $row['type'] . '</td></tr>';
                             }
                         }
                         $mysqli->close();
@@ -78,12 +78,16 @@
                 var fileList = [];
                 $("body").on('click', '#removeFile', function() {
                     debugger;
-                    fileList.push($(this).data('file'));
+                    var file = {
+                        name: $(this).data('file'),
+                        type: $(this).data('type')
+                    };
+                    fileList.push(file);
                 });
                 $("#removeButton").click(function() {
                     debugger;
                 //    event.preventDefault();
-                    document.getElementById("files").value = fileList;
+                    document.getElementById("files").value = JSON.stringify(fileList);
                     $("#removeFiles").submit();
                 });
             });
