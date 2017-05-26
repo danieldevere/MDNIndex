@@ -3,8 +3,8 @@
 
 
     if($mysqli->connect_errno) {
-        echo "Connect failed" . $mysqli->connect_error;
-        echo "<script type='text/javascript'>alert('there was a problem connecting');</script>";
+     //   echo "Connect failed" . $mysqli->connect_error;
+     //   echo "<script type='text/javascript'>alert('there was a problem connecting');</script>";
     }
     if(isset($_POST['data'])) {
         $files = json_decode($_POST['data']);
@@ -94,7 +94,7 @@
             fclose($handle);
             ini_set('auto_detect_line_endings', FALSE);
         } else {
-            echo "There was an error opening the file.";
+         //   echo "There was an error opening the file.";
         }
         $filestmt = $mysqli->prepare("DELETE FROM Files WHERE filename = ?");
         $filestmt->bind_param("s", $name);

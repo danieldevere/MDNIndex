@@ -60,15 +60,14 @@ $(document).ready(function() {
             url: 'remove.php',
             data: {data: JSON.stringify(deleteList)},
             type: 'POST',
-            dataType: 'json',
             success: function(data) {
                 debugger;
            //     window.alert(JSON.stringify(data));
                 loadFileList();
             },
-            error: function(data) {
+            error: function(error) {
                 debugger;
-      //          window.alert(JSON.stringify(data));
+                window.alert("There was an error");
                 loadFileList();
             }
         });
