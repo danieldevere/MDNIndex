@@ -1,5 +1,6 @@
 <?php
     header('Content-Type: text/event-stream');
+    header('Content-Type: text/event-stream');
     // recommended to prevent caching of event data.
     header('Cache-Control: no-cache'); 
   
@@ -13,10 +14,7 @@
         ob_flush();
         flush();
     }
-    //long_process.php
-    for($i=1;$i<=10;$i++){
-        send_message($i, 'on iteration ' . $i . ' of 10' , $i*10);
-        sleep(1);
-    }
-    send_message('CLOSE', 'Process complete');
+    session_start();
+    $percent = $_SESSION['progress'];
+    send_message('whatever', 'message', $percent);
 ?>

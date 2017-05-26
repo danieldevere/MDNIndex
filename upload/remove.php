@@ -1,19 +1,6 @@
 <?php
 
-    header('Content-Type: text/event-stream');
-    // recommended to prevent caching of event data.
-    header('Cache-Control: no-cache'); 
-  
-    function send_message($id, $message, $progress) {
-        $d = array('message' => $message , 'progress' => $progress);
-        
-        echo "id: $id" . PHP_EOL;
-        echo "data: " . json_encode($d) . PHP_EOL;
-        echo PHP_EOL;
-        
-        ob_flush();
-        flush();
-    }
+
 
     $mysqli = mysqli_connect("localhost", "root", "", "obits2");
 
@@ -50,9 +37,11 @@
                 while (($data = fgetcsv($handle, ',')) !== FALSE) {
                     $currentPercent += $percentPerRow;
                     if($currentPercent % 5 == 0) {
-                        $
+                        session_start();
+                        $_SESSION["progress"] = $currentPercent;
+                        session_write_close();
                     }
-                    send_message($files[$j]->filename, 'working', $currentPercent);
+              //      send_message($files[$j]->filename, 'working', $currentPercent);
                     if($lastnameReached && $data[0] != "") {
                         for($c = 0; $c < 6; $c++) {
                             $data[$c] = str_replace('"', '', $data[$c]);
@@ -82,7 +71,12 @@
                 $subjectReached = false;
 				while (($data = fgetcsv($handle, ',')) !== FALSE) {
                     $currentPercent += $percentPerRow;
-                    send_message($files[$j]->filename, 'working', $currentPercent);
+                    if($currentPercent % 5 == 0) {
+                        session_start();
+                        $_SESSION["progress"] = $currentPercent;
+                        session_write_close();
+                    }
+                //    send_message($files[$j]->filename, 'working', $currentPercent);
 					if($subjectReached && $data[0] != "") {
 						for($c=0; $c < 4; $c++) {
 							$data[$c] = str_replace('"', '', $data[$c]);
@@ -108,7 +102,12 @@
 				$lastNameReached = false;
 				while (($data = fgetcsv($handle, ',')) !== FALSE) {
                     $currentPercent += $percentPerRow;
-                    send_message($files[$j]->filename, 'working', $currentPercent);
+                    if($currentPercent % 5 == 0) {
+                        session_start();
+                        $_SESSION["progress"] = $currentPercent;
+                        session_write_close();
+                    }
+              //      send_message($files[$j]->filename, 'working', $currentPercent);
 					if($lastNameReached && $data[0] != "") {
 						for($c=0; $c < 6; $c++) {
 							$data[$c] = str_replace('"', '', $data[$c]);

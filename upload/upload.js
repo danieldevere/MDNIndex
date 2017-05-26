@@ -86,7 +86,7 @@ $(document).ready(function() {
 
     var es;
     function startTask() {
-        es = new EventSource('remove.php');
+        es = new EventSource('sse_progress.php');
         
         //a message is received
         es.addEventListener('message', function(e) {
