@@ -6,12 +6,12 @@
         echo "Connect failed" . $mysqli->connect_error;
         echo "<script type='text/javascript'>alert('there was a problem connecting');</script>";
     }
-    if(isset($_POST['files'])) {
-        $files = json_decode($_POST['files']);
+    if(isset($_POST['data'])) {
+        $files = json_decode($_POST['data']);
     }
     for($j=0;$j<count($files);$j++) {
         $currentdir = getcwd();
-        $target = $currentdir . '/uploads/' . $files[$j]->name . '.csv';
+        $target = $currentdir . '/uploads/' . $files[$j]->filename . '.csv';
         if(($handle = fopen($target, "r")) !== FALSE) {
         //    echo 'before prepare';
             if($files[$j]->type == 'Obituary') {
@@ -98,12 +98,8 @@
         }
         $filestmt = $mysqli->prepare("DELETE FROM Files WHERE filename = ?");
         $filestmt->bind_param("s", $name);
-        $name = $files[$j]->name;
-        if($filestmt->execute()) {
-            echo 'Success';
-        } else {
-            echo 'Error';
-        }
+        $name = $files[$j]->filename;
+        $filestmt->execute();
     }
     $mysqli->close();
 

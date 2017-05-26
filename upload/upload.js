@@ -9,7 +9,7 @@ $(document).ready(function() {
         this.row = function() {
             var string = '<tr><td><input data-id="' + this.id + '" type="checkbox" id="removeFile" data-type="' + this.type + '" data-file="' + this.filename + '"></td><td>' + this.uploaddate + '</td><td>' + this.filename + '</td><td>' + this.type + '</td></tr>';
             return string;
-        }
+        };
     }
 
     // Globals
@@ -38,26 +38,41 @@ $(document).ready(function() {
     });
     $("#removeButton").click(function() {
         debugger;
-        var deleteList = $("#removeFile:checked");
-        var list = [];
-        for(x in deleteList) {
-            var item = fileList.find(function(a) { return a.id = deleteList[x].data('id');});
-            list.push(item);
+        var deleteList = [];
+        var list = $('#removeFile:checked').map(function() {
+            return $(this).data('id');
+        }).get();
+        for(x in list) {
+            var item = fileList.find(function(a) {
+                return a.id == list[x];
+            });
+            deleteList.push(item);
+       //     window.alert(JSON.stringify(deleteList));
         }
+ /*       $('#removeFile:checked').each(function() {
+            var item = fileList.find(function(a) {
+                return a.id == $(this).data('id');
+            });
+            deleteList.push(item);
+        });*/
       //  debugger;
         $.ajax({
             url: 'remove.php',
-            data: list,
+            data: {data: JSON.stringify(deleteList)},
             type: 'POST',
             dataType: 'json',
             success: function(data) {
-                window.alert(JSON.stringify(data));
+                debugger;
+           //     window.alert(JSON.stringify(data));
+                loadFileList();
             },
             error: function(data) {
-                window.alert(JSON>stringify(data));
+                debugger;
+      //          window.alert(JSON.stringify(data));
+                loadFileList();
             }
         });
-        debugger;
+     //   debugger;
     //    event.preventDefault();
     /*    document.getElementById("files").value = JSON.stringify(fileList);
         $("#removeFiles").submit();*/
