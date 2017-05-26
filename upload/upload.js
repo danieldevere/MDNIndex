@@ -35,6 +35,8 @@ $(document).ready(function() {
         });
     }
     $("body").on('click', '#removeFile', function() {
+    /*    $('#workingModal').modal('show');
+        startTask();*/
     });
     $("#removeButton").click(function() {
         debugger;
@@ -47,7 +49,7 @@ $(document).ready(function() {
                 return a.id == list[x];
             });
             deleteList.push(item);
-       //     window.alert(JSON.stringify(deleteList));
+            window.alert(JSON.stringify(deleteList));
         }
  /*       $('#removeFile:checked').each(function() {
             var item = fileList.find(function(a) {
@@ -62,18 +64,62 @@ $(document).ready(function() {
             type: 'POST',
             success: function(data) {
                 debugger;
-           //     window.alert(JSON.stringify(data));
+           //     $("#workingModal").modal('hide');
+            //    window.alert(JSON.stringify('Success!'));
                 loadFileList();
             },
             error: function(error) {
+                $("#workingModal").modal('hide');                
                 debugger;
                 window.alert("There was an error");
                 loadFileList();
             }
         });
+        $("#workingModal").modal('show');
+        startTask();
      //   debugger;
     //    event.preventDefault();
     /*    document.getElementById("files").value = JSON.stringify(fileList);
         $("#removeFiles").submit();*/
     });
+
+
+    var es;
+    function startTask() {
+        es = new EventSource('remove.php');
+        
+        //a message is received
+        es.addEventListener('message', function(e) {
+            var result = JSON.parse( e.data );
+
+            console.log(result.message); 
+            
+            if(e.lastEventId == 'CLOSE') {
+            //    addLog('Received CLOSE closing');
+                console.log('Received CLOSE');
+                es.close();
+                var pBar = document.getElementById('progressor');
+                pBar.style.width = '100%'; //max out the progress bar
+                $('#workingModal').modal('close');
+            }
+            else {
+                var pBar = document.getElementById('progressor');
+                console.log(result.progress);
+                pBar.style.width = result.progress + '%';
+                var perc = document.getElementById('percentage');
+                perc.innerHTML   = result.progress  + "%";
+           //     perc.style.width = (Math.floor(pBar.clientWidth * (result.progress/100)) + 15) + 'px';
+            }
+        });
+        
+/*        es.addEventListener('error', function(e) {
+            console.log('Error occurred');
+            es.close();
+        });*/
+    }
+        
+    function stopTask() {
+        es.close();
+        console.log('Interrupted');
+    }
 });

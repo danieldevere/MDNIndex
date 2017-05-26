@@ -1,4 +1,20 @@
 <?php
+
+    header('Content-Type: text/event-stream');
+    // recommended to prevent caching of event data.
+    header('Cache-Control: no-cache'); 
+  
+    function send_message($id, $message, $progress) {
+        $d = array('message' => $message , 'progress' => $progress);
+        
+        echo "id: $id" . PHP_EOL;
+        echo "data: " . json_encode($d) . PHP_EOL;
+        echo PHP_EOL;
+        
+        ob_flush();
+        flush();
+    }
+
     $mysqli = mysqli_connect("localhost", "root", "", "obits2");
 
 
@@ -6,12 +22,25 @@
      //   echo "Connect failed" . $mysqli->connect_error;
      //   echo "<script type='text/javascript'>alert('there was a problem connecting');</script>";
     }
-    if(isset($_POST['data'])) {
-        $files = json_decode($_POST['data']);
+    if(isset($_GET['data'])) {
+        $files = json_decode($_GET['data']);
     }
-    for($j=0;$j<count($files);$j++) {
+
+    if(isset($files) && count($files) > 0) {
+        $percent = 0.0;
+        $percentPerFile = 100 / count($files);
+        for($j=0;$j<count($files);$j++) {
         $currentdir = getcwd();
         $target = $currentdir . '/uploads/' . $files[$j]->filename . '.csv';
+/*        $file = new SplFileObject($target, 'r');
+        $file->seek(PHP_INT_MAX);
+        $fileLength = $file->key() + 1;*/
+        $fileLength = count(file($target));
+        $percentPerRow = $percentPerFile * 100 / $fileLength;
+        if($currentPercent != $j * $percentPerFile) {
+            $currentPercent = $j * $percentPerFile;
+        }
+
         if(($handle = fopen($target, "r")) !== FALSE) {
         //    echo 'before prepare';
             if($files[$j]->type == 'Obituary') {
@@ -19,7 +48,11 @@
                 $stmt->bind_param("ssssss", $lastname, $firstname, $birthdate, $deathdate, $obitdate, $page);
                 $lastnameReached = false;
                 while (($data = fgetcsv($handle, ',')) !== FALSE) {
-                //   echo $data[0];
+                    $currentPercent += $percentPerRow;
+                    if($currentPercent % 5 == 0) {
+                        $
+                    }
+                    send_message($files[$j]->filename, 'working', $currentPercent);
                     if($lastnameReached && $data[0] != "") {
                         for($c = 0; $c < 6; $c++) {
                             $data[$c] = str_replace('"', '', $data[$c]);
@@ -48,6 +81,8 @@
                 $stmt->bind_param("ssss", $subject, $article, $page, $articledate);
                 $subjectReached = false;
 				while (($data = fgetcsv($handle, ',')) !== FALSE) {
+                    $currentPercent += $percentPerRow;
+                    send_message($files[$j]->filename, 'working', $currentPercent);
 					if($subjectReached && $data[0] != "") {
 						for($c=0; $c < 4; $c++) {
 							$data[$c] = str_replace('"', '', $data[$c]);
@@ -72,6 +107,8 @@
 				$stmt->bind_param("ssssss", $lastname, $firstname, $announcement, $weddingdate, $articledate, $page);
 				$lastNameReached = false;
 				while (($data = fgetcsv($handle, ',')) !== FALSE) {
+                    $currentPercent += $percentPerRow;
+                    send_message($files[$j]->filename, 'working', $currentPercent);
 					if($lastNameReached && $data[0] != "") {
 						for($c=0; $c < 6; $c++) {
 							$data[$c] = str_replace('"', '', $data[$c]);
@@ -101,6 +138,9 @@
         $name = $files[$j]->filename;
         $filestmt->execute();
     }
+    send_message('CLOSE', 'finished');
+    }
     $mysqli->close();
+    
 
 ?>
