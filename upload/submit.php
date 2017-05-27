@@ -9,6 +9,7 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
         <!-- Latest compiled and minified JavaScript -->
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+        <script src="submit.js"></script>
     </head>
     <body>
         <nav class="navbar navbar-default">
@@ -91,25 +92,26 @@
                         Upload Weddings-Anniversaries File
                     </label>
                 </div>
-                <button id="processButton" type="submit" class="btn btn-default" name="submit">Process</button>
+                <button id="processButton" type="button" class="btn btn-default" name="submit">Process</button>
             </form>
         </div>
-        <script>
-            $(document).ready(function() {
-                $("#processButton").click(function() {
-                    $("#processButton").text('Processing...');
-                    $("#processButton").addClass('disabled');
-                });
-                $("#newsLabel").click(function() {
-                    $("form").attr("action", "processNews.php");
-                });
-                $("#obitLabel").click(function() {
-                    $("form").attr("action", "process.php");
-                });
-                $("#weddingsLabel").click(function() {
-                    $("form").attr("action", "processWeddings.php");
-                });
-            });
-        </script>
+        <div id="workingModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="workingModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="workingModalLabel">Working...</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="progress">
+                            <div id="progressor" class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%;">
+                                <span id="percentage" class="sr-only">60% Complete</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
     </body>
 </html>

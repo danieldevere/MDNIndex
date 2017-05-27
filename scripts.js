@@ -313,6 +313,7 @@ $(document).ready(function() {
         addedPrint.addClass("disabled");
     });
     $("#resultsHere").on('click', '#printAllObits:enabled', function(){
+        debugger;
         for(x in obituaryList.list) {
             if(!obituaryList.list[x].printed()) {
                 printList.obituaryList.push(obituaryList.list[x]);
