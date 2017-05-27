@@ -14,7 +14,7 @@ $(document).ready(function() {
 
     // Globals
     var fileList = [];
-
+    var file;
     // Load file list
     loadFileList();
 
@@ -34,6 +34,174 @@ $(document).ready(function() {
             }
         });
     }
+
+    // Events
+    $("#uploadFormSubmit").click(function() {
+        file = document.getElementById('upload').files;
+        var formData = new FormData();
+        // Loop through each of the selected files.
+  //      if(file[0].type.match('*.csv')) {
+            formData.append('xlsfile', file[0], file[0].name);
+      //      window.alert(file[0].name);
+   //     } else {
+     //       window.alert("Wrong file type");
+    //    }
+        /*for (var i = 0; i < files.length; i++) {
+            var file = files[i];
+
+            // Check the file type.
+            if (!file.type.match('*.csv')) {
+                window.alert("Wrong file type");
+                return;
+            }
+
+            // Add the file to the request.
+            formData.append('xlsfile', file, file.name);
+        }*/
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'submitAPI.php', true);
+        xhr.onload = function (data) {
+            if(xhr.status === 200) {
+                // File(s) uploaded.
+                $("#processModal").modal({
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                $("#processModal").modal('show');
+
+            } else {
+                window.alert('Error');
+            }
+        };
+        xhr.send(formData);
+        /*$.ajax({
+            url: 'submitAPI.php',
+            type: 'POST',
+            data: formData,
+            success: function(data) {
+                window.alert(JSON.stringify(data));
+            },
+            error: function(data) {
+                window.alert(JSON.stringify(data));
+            }
+        });*/
+    });
+    $("#articleButton").click(function() {
+        var fileData = {
+            filesent: file.name
+        }
+        debugger;
+        $.ajax({
+            url: 'processNews.php',
+            type: 'POST',
+            data: {filesent: file[0].name},
+            success: function(data) {
+                $("#workingModal").modal('hide');
+                $("#successModal").modal('show');
+                loadFileList();
+            },
+            error: function(data) {
+                window.alert('error');
+            }
+        });
+        function getProgress() {
+            $.ajax({
+                url: 'processStatus.php',
+                success: function(data) {
+                    console.log(data);
+                    document.getElementById('progressor').style.width = data + '%';
+                    document.getElementById('percentage').innerHTML = data + '%';
+                    if(data < 100) {
+                        getProgress();
+                    } else {
+                      //  $("#workingModal").modal('hide');
+                    }
+                }
+            });
+        }
+        $("#processModal").modal('hide');        
+        $("#workingModal").modal({
+            backdrop: 'static',
+            keyboard: false
+        });
+        $("#workingModal").modal('show');
+        getProgress();        
+    });
+    
+    $("#obitButton").click(function() {
+        $.ajax({
+            url: 'process.php',
+            type: 'POST',
+            data: {filesent: file[0].name},
+            success: function(data) {
+                $("#workingModal").modal('hide');
+                $("#successModal").modal('show');
+                loadFileList();
+            },
+            error: function(data) {
+                window.alert('error');
+            }
+        });
+        function getProgress() {
+            $.ajax({
+                url: 'processStatus.php',
+                success: function(data) {
+                    console.log(data);
+                    document.getElementById('progressor').style.width = data + '%';
+                    document.getElementById('percentage').innerHTML = data + '%';
+                    if(data < 100) {
+                        getProgress();
+                    } else {
+                      //  $("#workingModal").modal('hide');
+                    }
+                }
+            });
+        }
+        $("#processModal").modal('hide');        
+        $("#workingModal").modal({
+            backdrop: 'static',
+            keyboard: false
+        });
+        $("#workingModal").modal('show');
+        getProgress();        
+    });
+    $("#weddingButton").click(function() {
+        $.ajax({
+            url: 'processWeddings.php',
+            type: 'POST',
+            data: {filesent: file[0].name},
+            success: function(data) {
+                $("#workingModal").modal('hide');
+                $("#successModal").modal('show');
+                loadFileList();
+            },
+            error: function(data) {
+                window.alert('error');
+            }
+        });
+        function getProgress() {
+            $.ajax({
+                url: 'processStatus.php',
+                success: function(data) {
+                    console.log(data);
+                    document.getElementById('progressor').style.width = data + '%';
+                    document.getElementById('percentage').innerHTML = data + '%';
+                    if(data < 100) {
+                        getProgress();
+                    } else {
+                      //  $("#workingModal").modal('hide');
+                    }
+                }
+            });
+        }
+        $("#processModal").modal('hide');        
+        $("#workingModal").modal({
+            backdrop: 'static',
+            keyboard: false
+        });
+        $("#workingModal").modal('show');
+        getProgress();        
+    });
     $("body").on('click', '#removeFile', function() {
     /*    $('#workingModal').modal('show');
         startTask();*/
@@ -73,9 +241,11 @@ $(document).ready(function() {
             }
         });
         function getProgress() {
+            debugger;
             $.ajax({
                 url: 'sse_progress.php',
                 success: function(data) {
+                    debugger;
                     console.log(data);
                     document.getElementById('progressor').style.width = data + '%';
                     document.getElementById('percentage').innerHTML = data + '%';
@@ -84,6 +254,9 @@ $(document).ready(function() {
                     } else {
                       //  $("#workingModal").modal('hide');
                     }
+                },
+                error: function(data) {
+                    console.log(data);
                 }
             });
         }
@@ -99,4 +272,43 @@ $(document).ready(function() {
         $("#removeFiles").submit();*/
     });
 
+
+    var es;
+    function startTask() {
+        es = new EventSource('sse_progress.php');
+        
+        //a message is received
+        es.addEventListener('message', function(e) {
+            var result = JSON.parse( e.data );
+
+            console.log(result.message); 
+            
+            if(e.lastEventId == 'CLOSE') {
+            //    addLog('Received CLOSE closing');
+                console.log('Received CLOSE');
+                es.close();
+                var pBar = document.getElementById('progressor');
+                pBar.style.width = '100%'; //max out the progress bar
+                $('#workingModal').modal('close');
+            }
+            else {
+                var pBar = document.getElementById('progressor');
+                console.log(result.progress);
+                pBar.style.width = result.progress + '%';
+                var perc = document.getElementById('percentage');
+                perc.innerHTML   = result.progress  + "%";
+           //     perc.style.width = (Math.floor(pBar.clientWidth * (result.progress/100)) + 15) + 'px';
+            }
+        });
+        
+/*        es.addEventListener('error', function(e) {
+            console.log('Error occurred');
+            es.close();
+        });*/
+    }
+        
+    function stopTask() {
+        es.close();
+        console.log('Interrupted');
+    }
 });

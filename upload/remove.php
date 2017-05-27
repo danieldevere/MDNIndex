@@ -14,6 +14,9 @@
     }
 
     if(isset($files) && count($files) > 0) {
+        session_start();
+        $_SESSION['progress'] = 0.0;
+        session_write_close();
         ini_set('auto_detect_line_endings', TRUE);        
         $currentPercent = 0.0;
         $percentPerFile = 100 / count($files);
@@ -38,7 +41,7 @@
                     $lastnameReached = false;
                     while (($data = fgetcsv($handle, ',')) !== FALSE) {
                         $currentPercent += $percentPerRow;
-                        if($currentPercent % 5 == 0) {
+                        if(intval($currentPercent) % 5 == 0) {
                             session_start();
                             $_SESSION["progress"] = $currentPercent;
                             session_write_close();
@@ -73,7 +76,7 @@
                     $subjectReached = false;
                     while (($data = fgetcsv($handle, ',')) !== FALSE) {
                         $currentPercent += $percentPerRow;
-                        if($currentPercent % 5 == 0) {
+                        if(intval($currentPercent) % 5 == 0) {
                             session_start();
                             $_SESSION["progress"] = $currentPercent;
                             session_write_close();
@@ -104,7 +107,7 @@
                     $lastNameReached = false;
                     while (($data = fgetcsv($handle, ',')) !== FALSE) {
                         $currentPercent += $percentPerRow;
-                        if($currentPercent % 5 == 0) {
+                        if(intval($currentPercent) % 5 == 0) {
                             session_start();
                             $_SESSION["progress"] = $currentPercent;
                             session_write_close();

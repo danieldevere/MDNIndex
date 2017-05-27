@@ -5,12 +5,35 @@ $(document).ready(function() {
             method: 'POST',
             data: $("form").serialize(),
             success: function(data) {
-                window.alert(JSON.stringify(data));
+             //   window.alert(JSON.stringify(data));
+             $("#workingModal").modal('hide');
             },
             error: function(data) {
+                $("#workingModal").modal('hide');
                 window.alert(JSON.stringify(data));
             }
         });
+        function getProgress() {
+            $.ajax({
+                url: 'processStatus.php',
+                success: function(data) {
+                    console.log(data);
+                    document.getElementById('progressor').style.width = data + '%';
+                    document.getElementById('percentage').innerHTML = data + '%';
+                    if(data < 100) {
+                        getProgress();
+                    } else {
+                      //  $("#workingModal").modal('hide');
+                    }
+                }
+            });
+        }
+        $("#workingModal").modal({
+            backdrop: 'static',
+            keyboard: false
+        });
+        $("#workingModal").modal('show');
+        getProgress();        
         $("#processButton").text('Processing...');
         $("#processButton").addClass('disabled');
     });
