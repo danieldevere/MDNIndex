@@ -29,7 +29,7 @@
                         <li><a href="http://www2.midland-mi.org/newspaper/MDNindex.htm" target="_blank">Raw Data</a></li>
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
-                        <li><a href="upload.php">Upload Data</a></li>
+                        <li><a href="upload.html">Upload Data</a></li>
                     </ul>
                 </div>
             </div>

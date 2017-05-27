@@ -1,5 +1,5 @@
 <?php
-    header('Content-Type: text/event-stream');
+/*    header('Content-Type: text/event-stream');
     header('Content-Type: text/event-stream');
     // recommended to prevent caching of event data.
     header('Cache-Control: no-cache'); 
@@ -13,8 +13,8 @@
         
         ob_flush();
         flush();
-    }
+    }*/
     session_start();
-    $percent = $_SESSION['progress'];
-    send_message('whatever', 'message', $percent);
+    $percent = $_SESSION['progress'] + 5;
+    echo $percent;
 ?>

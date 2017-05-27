@@ -39,7 +39,7 @@ $(document).ready(function() {
         startTask();*/
     });
     $("#removeButton").click(function() {
-        debugger;
+      //  debugger;
         var deleteList = [];
         var list = $('#removeFile:checked').map(function() {
             return $(this).data('id');
@@ -49,7 +49,7 @@ $(document).ready(function() {
                 return a.id == list[x];
             });
             deleteList.push(item);
-            window.alert(JSON.stringify(deleteList));
+  //          window.alert(JSON.stringify(deleteList));
         }
  /*       $('#removeFile:checked').each(function() {
             var item = fileList.find(function(a) {
@@ -63,20 +63,36 @@ $(document).ready(function() {
             data: {data: JSON.stringify(deleteList)},
             type: 'POST',
             success: function(data) {
-                debugger;
-           //     $("#workingModal").modal('hide');
-            //    window.alert(JSON.stringify('Success!'));
+                $("#workingModal").modal('hide');
                 loadFileList();
             },
             error: function(error) {
                 $("#workingModal").modal('hide');                
-                debugger;
                 window.alert("There was an error");
                 loadFileList();
             }
         });
+        function getProgress() {
+            $.ajax({
+                url: 'sse_progress.php',
+                success: function(data) {
+                    console.log(data);
+                    document.getElementById('progressor').style.width = data + '%';
+                    document.getElementById('percentage').innerHTML = data + '%';
+                    if(data < 100) {
+                        getProgress();
+                    } else {
+                      //  $("#workingModal").modal('hide');
+                    }
+                }
+            });
+        }
+        $("#workingModal").modal({
+            backdrop: 'static',
+            keyboard: false
+        });
         $("#workingModal").modal('show');
-        startTask();
+        getProgress();        
      //   debugger;
     //    event.preventDefault();
     /*    document.getElementById("files").value = JSON.stringify(fileList);
