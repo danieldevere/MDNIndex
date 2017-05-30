@@ -1,5 +1,7 @@
 <?php
-
+    session_start();
+    $_SESSION['progress'] = 0.0;
+    session_write_close();
 
 
     $mysqli = mysqli_connect("localhost", "root", "", "obits2");
@@ -14,9 +16,7 @@
     }
 
     if(isset($files) && count($files) > 0) {
-        session_start();
-        $_SESSION['progress'] = 0.0;
-        session_write_close();
+        
         ini_set('auto_detect_line_endings', TRUE);        
         $currentPercent = 0.0;
         $percentPerFile = 100 / count($files);

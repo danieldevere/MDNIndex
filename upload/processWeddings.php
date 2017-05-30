@@ -1,6 +1,9 @@
 
 			<?php
 
+			session_start();
+			$_SESSION["process"] = 0;
+			session_write_close();
 
 			$mysqli = mysqli_connect("localhost", "root", "", "Obits2");
 
@@ -46,9 +49,7 @@
 			$currentdir = getcwd();
 			$file = $_POST['filesent'];
 			$filePath = $currentdir . '/uploads/' . $file;
-			session_start();
-			$_SESSION["process"] = 0;
-			session_write_close();
+			
 			ini_set('auto_detect_line_endings', TRUE);
 			$currentPercent = 0.0;
 			if(($handle = fopen($filePath, "r")) !== FALSE) {

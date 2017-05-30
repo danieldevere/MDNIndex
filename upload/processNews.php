@@ -1,5 +1,8 @@
 
 			<?php
+			session_start();
+			$_SESSION["process"] = 0;
+			session_write_close();
 
 			
 			$mysqli = mysqli_connect("localhost", "root", "", "Obits2");
@@ -41,9 +44,7 @@
 				echo "<script type='text/javascript'>alert('there was a problem connecting');</script>";
 			}
 
-			session_start();
-			$_SESSION["process"] = 0;
-			session_write_close();
+
 			$currentdir = getcwd();
 			$file = $_POST['filesent'];
 			$filePath = $currentdir . '/uploads/' . $file;

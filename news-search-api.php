@@ -1,4 +1,7 @@
  <?php
+ // Error checking functions
+
+ function checkSubjects()
     $searchString = "SELECT * FROM News WHERE ";
     if(isset($_GET['subjects'])) {
         $subjects = json_decode($_GET['subjects'], true);
