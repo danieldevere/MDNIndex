@@ -1,21 +1,44 @@
 <?php
-    if(isset($_GET['searchtype'])) {
-        $searchType = $_GET['searchtype'];
+// Check if inputs are set properly
+function checkInputs() {
+    if(empty($_GET['searchtype'])) {
+        throw new Exception("Search type wasn't set.");
     }
-    if(isset($_GET['lastname'])) {
-        $lastname = $_GET['lastname'];
+    if(!empty($_GET['lastname'])) {
+        return true;
     }
-    if(isset($_GET['firstname'])) {
-        $firstname = $_GET['firstname'];
-    }
-    $servername = "localhost";
-    $username = "root";
-    $password = "";
-    $dbname = "obits2";
+    throw new Exception("Last name is not set.");
+}
+// Sanitize user input
+function sanitizeInput($input) {
+    $input = trim($input);
+    $input = stripslashes($input);
+    $input = htmlspecialchars($input);
+    return $input;
+}
+    
 
     try {
+        checkInputs();
+        // Get user input
+        if(isset($_GET['searchtype'])) {
+            $searchType = sanitizeInput($_GET['searchtype']);
+        }
+        if(isset($_GET['lastname'])) {
+            $lastname = sanitizeInput($_GET['lastname']);
+        }
+        if(isset($_GET['firstname'])) {
+            $firstname = sanitizeInput($_GET['firstname']);
+        }
+        // SQL Login info
+        $servername = "localhost";
+        $username = "root";
+        $password = "";
+        $dbname = "obits2";
+
         $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        // set up prepared search string
         if($searchType == 'obituaries') {
             $searchString = "SELECT * FROM Obituaries WHERE";
         } elseif($searchType == 'weddings') {
@@ -31,6 +54,7 @@
         }
         
         $stmt = $conn->prepare($searchString);
+        // Bind search parameters
         if(isset($lastname) && $lastname != "") {
             $stmt->bindParam(':lastname', $lastname);
         }
@@ -41,6 +65,7 @@
             $stmt->bindParam(':firstname1', $firstname1);
         }
         $result = $stmt->execute();
+        // Create result array
         if(isset($result)) {
             $resultArray = [];
             while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -65,9 +90,12 @@
             }
             echo json_encode($resultArray);
         }
+        $conn = null;
     } catch(PDOException $e) {
-        echo $searchString;
-        echo "Error: " . $e->getMessage();
+        echo 'There was a problem connecting to the database.';
     }
-    $conn = null;
+    catch(Exception $e) {
+        echo $e->getMessage();
+    }
+
 ?>

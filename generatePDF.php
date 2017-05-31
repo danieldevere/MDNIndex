@@ -1,11 +1,7 @@
 <?php
-//echo "Hello";
 require('fpdf/fpdf.php');
 if(isset($_POST['articles'])) {
-//    echo 'posted data';
     $articles = json_decode($_POST['articles'], true);    
- //   echo $articles[0]['subject'];
- //   echo $articles;
 }
 if(isset($_POST['obituaries'])) {
     $obituaries = json_decode($_POST['obituaries'], true);
@@ -123,7 +119,6 @@ class PDF extends FPDF
             $fill = !$fill;
         }
         // Closing line
-   //     $this->Cell(array_sum($w),0,'','T');
     }
 }
 if(isset($header) && isset($data)) {
