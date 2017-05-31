@@ -14,7 +14,7 @@
         ob_flush();
         flush();
     }*/
-    session_start();
+/*    session_start();
     $percent = $_SESSION["process"] + 5;
-    echo $percent;
+    echo $percent;*/
 ?>

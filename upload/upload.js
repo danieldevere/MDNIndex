@@ -41,7 +41,7 @@ $(document).ready(function() {
         var formData = new FormData();
         // Loop through each of the selected files.
   //      if(file[0].type.match('*.csv')) {
-            formData.append('xlsfile', file[0], file[0].name);
+            formData.append('xlsfile', file[0]);
       //      window.alert(file[0].name);
    //     } else {
      //       window.alert("Wrong file type");
@@ -58,8 +58,8 @@ $(document).ready(function() {
             // Add the file to the request.
             formData.append('xlsfile', file, file.name);
         }*/
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', 'submitAPI.php', true);
+/*        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'submitAPI.php', false);
         xhr.onload = function (data) {
             if(xhr.status === 200) {
                 // File(s) uploaded.
@@ -68,43 +68,78 @@ $(document).ready(function() {
                     keyboard: false
                 });
                 $("#processModal").modal('show');
-
             } else {
                 window.alert('Error');
             }
         };
-        xhr.send(formData);
-        /*$.ajax({
+        xhr.send(formData);*/
+        $.ajax({
             url: 'submitAPI.php',
             type: 'POST',
             data: formData,
+            contentType: false,
+            processData: false,
             success: function(data) {
-                window.alert(JSON.stringify(data));
+                $("#processModal").modal({
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                $("#processModal").modal('show');
             },
             error: function(data) {
                 window.alert(JSON.stringify(data));
             }
-        });*/
+        });
     });
     $("#articleButton").click(function() {
+        window.pollingPeriod = 100;
+        window.progressInterval;
         var fileData = {
             filesent: file.name
         }
-        debugger;
+      //  debugger;
         $.ajax({
             url: 'processNews.php',
             type: 'POST',
             data: {filesent: file[0].name},
             success: function(data) {
+                clearInterval(window.progressInterval);
                 $("#workingModal").modal('hide');
                 $("#successModal").modal('show');
                 loadFileList();
             },
             error: function(data) {
+                clearInterval(window.progressInterval);
                 window.alert('error');
             }
         });
-        function getProgress() {
+        $("#processModal").modal('hide');
+        $("#workingModal").modal({
+            backdrop: 'static',
+            keyboard: false
+        });
+        $("#workingModal").modal('show');
+        window.progressInterval = setInterval(updateProgress, window.pollingPeriod);
+        function updateProgress() {
+            $.ajax({
+                url: 'progress.json',
+                success: function(data) {
+                    console.log(data.percentComplete + ' complete');
+                    document.getElementById("progressor").style.width = data.percentComplete + '%';
+                },
+                error: function(data) {
+                    console.log(JSON.stringify(data));
+            //        clearInterval(window.progressInterval);
+                }
+            });
+        }
+
+
+
+
+
+
+/*        function getProgress() {
             $.ajax({
                 url: 'processStatus.php',
                 success: function(data) {
@@ -125,7 +160,7 @@ $(document).ready(function() {
             keyboard: false
         });
         $("#workingModal").modal('show');
-        getProgress();        
+        getProgress();  */      
     });
     
     $("#obitButton").click(function() {
@@ -272,43 +307,7 @@ $(document).ready(function() {
         $("#removeFiles").submit();*/
     });
 
+// New Progress
 
-    var es;
-    function startTask() {
-        es = new EventSource('sse_progress.php');
-        
-        //a message is received
-        es.addEventListener('message', function(e) {
-            var result = JSON.parse( e.data );
 
-            console.log(result.message); 
-            
-            if(e.lastEventId == 'CLOSE') {
-            //    addLog('Received CLOSE closing');
-                console.log('Received CLOSE');
-                es.close();
-                var pBar = document.getElementById('progressor');
-                pBar.style.width = '100%'; //max out the progress bar
-                $('#workingModal').modal('close');
-            }
-            else {
-                var pBar = document.getElementById('progressor');
-                console.log(result.progress);
-                pBar.style.width = result.progress + '%';
-                var perc = document.getElementById('percentage');
-                perc.innerHTML   = result.progress  + "%";
-           //     perc.style.width = (Math.floor(pBar.clientWidth * (result.progress/100)) + 15) + 'px';
-            }
-        });
-        
-/*        es.addEventListener('error', function(e) {
-            console.log('Error occurred');
-            es.close();
-        });*/
-    }
-        
-    function stopTask() {
-        es.close();
-        console.log('Interrupted');
-    }
 });

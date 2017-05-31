@@ -1,9 +1,7 @@
 
 			<?php
-			session_start();
-			$_SESSION["process"] = 0;
-			session_write_close();
-
+			try{
+				file_put_contents('progress.json', json_encode(array('percentComplete'=>0)));
 			
 			$mysqli = mysqli_connect("localhost", "root", "", "Obits2");
 
@@ -58,14 +56,18 @@
 				$fileLength = count(file($filePath));
 				$percentPerRow = 100 / $fileLength;
 				while (($data = fgetcsv($handle, ',')) !== FALSE) {
-					$currentPercent += $percentPerRow;
-					session_start();
-					$_SESSION["process"] = $currentPercent;
-					session_write_close();
+					$currentPercent = $currentPercent + $percentPerRow;
+					$roundedPercent = ceil($currentPercent);
+					if($roundedPercent % 2 == 0) {
+						file_put_contents('progress.json', json_encode(array('percentComplete'=>$roundedPercent)));
+					}
 					if($subjectReached && $data[0] != "") {
 						for($c=0; $c < 4; $c++) {
+							$data[$c] = $mysqli->real_escape_string($data[$c]);
 							$data[$c] = str_replace('"', '', $data[$c]);
 							$data[$c] = str_replace("'", "", $data[$c]);
+							$data[$c] = str_replace(":", " ", $data[$c]);
+							$data[$c] = str_replace("$", '', $data[$c]);
 							if($c < 1) {
 								$data[$c] = str_replace('-', ' - ', $data[$c]);
 							}
@@ -75,7 +77,11 @@
 						$page = $data[2];
 						$articledate = date("Y-m-d", strtotime($data[3]));
 					//	$year = $data[4];
-						$stmt->execute();
+						if($stmt->execute()) {
+							echo "success";
+						} else {
+							throw new Exception("Error");
+						}
 					}
 					if(strcasecmp($data[0], 'subject') == 0) {
 						$subjectReached = true;
@@ -93,5 +99,9 @@
 			$type = "Article";
 			$filestmt->execute();
 			$mysqli->close();
-			session_destroy();
+			}
+			catch(Exception $e) {
+				echo $e->getMessage();
+			}
+			exit(0);
 			?>
