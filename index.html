@@ -42,7 +42,8 @@
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                         <li><a href="upload/upload.html" target="_blank">Upload Data</a></li>
-                        <li><button class="btn btn-primary" id="printButton">Print</button></li>
+                        <li><a href="#" id="printButton">Print</a></li>
+                        <li><a href="#" id="viewPrints">View Prints</a></li>
                     </ul>
                     <form id="printForm" action="generatePDF.php" method="POST" target="_blank">
                         <input type="hidden" id="articleData" name="articles">
@@ -176,7 +177,21 @@
                     </div>
                 </div>
             </div>
-            
+            <div class="modal fade" id="printModal" data-toggle="modal" tabindex="-1" role="dialog">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                            <h4 class="modal-title">Print Queue</h4>
+                        </div>
+                        <div class="modal-body" id="printsHere">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="push"></div>
         </div>

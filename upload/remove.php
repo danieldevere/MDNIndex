@@ -1,6 +1,6 @@
 <?php
 
-    set_time_limit(150);
+    set_time_limit(600);
 	file_put_contents('progress.json', json_encode(array('percentComplete'=>0)));
 	$servername = 'localhost';
 	$username = 'root';

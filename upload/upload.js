@@ -15,6 +15,8 @@ $(document).ready(function() {
     // Globals
     var fileList = [];
     var file;
+    window.pollingPeriod = 200;
+    window.progressInterval;
     // Load file list
     loadFileList();
 
@@ -31,6 +33,37 @@ $(document).ready(function() {
                     htmlString += thisFile.row();
                 }
                 document.getElementById("filesTable").innerHTML = htmlString;
+            }
+        });
+    }
+
+    function uploadFinished() {
+        clearInterval(window.progressInterval);
+        $("#workingModal").modal('hide');
+        $("#successModal").modal('show');
+        loadFileList();
+    }
+
+    function uploadInProgress() {
+        $("#processModal").modal('hide');
+        $("#workingModal").modal({
+            backdrop: 'static',
+            keyboard: false
+        });
+        $("#workingModal").modal('show');
+        window.progressInterval = setInterval(updateProgress, window.pollingPeriod);
+    }
+
+    function updateProgress() {
+        $.ajax({
+            url: 'progress.json',
+            success: function(data) {
+                console.log(data.percentComplete + ' complete');
+                document.getElementById("progressor").style.width = data.percentComplete + '%';
+                document.getElementById("percentage").innerHTML = data.percentComplete + '%';
+            },
+            error: function(data) {
+                console.log(JSON.stringify(data));
             }
         });
     }
@@ -52,6 +85,7 @@ $(document).ready(function() {
                     keyboard: false
                 });
                 $("#processModal").modal('show');
+                document.getElementById("processName").innerHTML = file[0].name;
             },
             error: function(data) {
                 window.alert(JSON.stringify(data));
@@ -59,17 +93,12 @@ $(document).ready(function() {
         });
     });
     $("#articleButton").click(function() {
-        window.pollingPeriod = 100;
-        window.progressInterval;
         $.ajax({
             url: 'processNews.php',
             type: 'POST',
             data: {filesent: file[0].name},
             success: function(data) {
-                clearInterval(window.progressInterval);
-                $("#workingModal").modal('hide');
-                $("#successModal").modal('show');
-                loadFileList();
+                uploadFinished();
             },
             error: function(data) {
                 clearInterval(window.progressInterval);
@@ -77,26 +106,7 @@ $(document).ready(function() {
                 console.log(JSON.stringify(data));
             }
         });
-        $("#processModal").modal('hide');
-        $("#workingModal").modal({
-            backdrop: 'static',
-            keyboard: false
-        });
-        $("#workingModal").modal('show');
-        window.progressInterval = setInterval(updateProgress, window.pollingPeriod);
-        function updateProgress() {
-            $.ajax({
-                url: 'progress.json',
-                success: function(data) {
-                    console.log(data.percentComplete + ' complete');
-                    document.getElementById("progressor").style.width = data.percentComplete + '%';
-                },
-                error: function(data) {
-                 //   debugger;
-                    console.log(JSON.stringify(data));
-                }
-            });
-        }   
+        uploadInProgress();
     });
     
     $("#obitButton").click(function() {
@@ -105,10 +115,7 @@ $(document).ready(function() {
             type: 'POST',
             data: {filesent: file[0].name},
             success: function(data) {
-                clearInterval(window.progressInterval);
-                $("#workingModal").modal('hide');
-                $("#successModal").modal('show');
-                loadFileList();
+                uploadFinished();
             },
             error: function(data) {
                 clearInterval(window.progressInterval);
@@ -116,26 +123,7 @@ $(document).ready(function() {
                 console.log(JSON.stringify(data));
             }
         });
-        $("#processModal").modal('hide');
-        $("#workingModal").modal({
-            backdrop: 'static',
-            keyboard: false
-        });
-        $("#workingModal").modal('show');
-        window.progressInterval = setInterval(updateProgress, window.pollingPeriod);
-        function updateProgress() {
-            $.ajax({
-                url: 'progress.json',
-                success: function(data) {
-                    console.log(data.percentComplete + ' complete');
-                    document.getElementById("progressor").style.width = data.percentComplete + '%';
-                },
-                error: function(data) {
-               //     debugger;
-                    console.log(JSON.stringify(data));
-                }
-            });
-        }      
+        uploadInProgress();
     });
     $("#weddingButton").click(function() {
         $.ajax({
@@ -143,10 +131,7 @@ $(document).ready(function() {
             type: 'POST',
             data: {filesent: file[0].name},
             success: function(data) {
-                clearInterval(window.progressInterval);
-                $("#workingModal").modal('hide');
-                $("#successModal").modal('show');
-                loadFileList();
+                uploadFinished();
             },
             error: function(data) {
                 clearInterval(window.progressInterval);
@@ -154,33 +139,9 @@ $(document).ready(function() {
                 console.log(JSON.stringify(data));
             }
         });
-        $("#processModal").modal('hide');
-        $("#workingModal").modal({
-            backdrop: 'static',
-            keyboard: false
-        });
-        $("#workingModal").modal('show');
-        window.progressInterval = setInterval(updateProgress, window.pollingPeriod);
-        function updateProgress() {
-            $.ajax({
-                url: 'progress.json',
-                success: function(data) {
-                    console.log(data.percentComplete + ' complete');
-                    document.getElementById("progressor").style.width = data.percentComplete + '%';
-                },
-                error: function(data) {
-                //    debugger;
-                    console.log(JSON.stringify(data));
-                }
-            });
-        }   
-    });
-    $("body").on('click', '#removeFile', function() {
-    /*    $('#workingModal').modal('show');
-        startTask();*/
+        uploadInProgress();  
     });
     $("#removeButton").click(function() {
-      //  debugger;
         var deleteList = [];
         var list = $('#removeFile:checked').map(function() {
             return $(this).data('id');
@@ -190,15 +151,7 @@ $(document).ready(function() {
                 return a.id == list[x];
             });
             deleteList.push(item);
-  //          window.alert(JSON.stringify(deleteList));
         }
- /*       $('#removeFile:checked').each(function() {
-            var item = fileList.find(function(a) {
-                return a.id == $(this).data('id');
-            });
-            deleteList.push(item);
-        });*/
-      //  debugger;
         $.ajax({
             url: 'remove.php',
             data: {data: JSON.stringify(deleteList)},
@@ -228,6 +181,7 @@ $(document).ready(function() {
                 success: function(data) {
                     console.log(data.percentComplete + ' complete');
                     document.getElementById("progressor").style.width = data.percentComplete + '%';
+                    document.getElementById("percentage").innerHTML = data.percentComplete + '%';                    
                 },
                 error: function(data) {
                 //    debugger;
@@ -235,39 +189,5 @@ $(document).ready(function() {
                 }
             });
         }   
-       /* function getProgress() {
-            debugger;
-            $.ajax({
-                url: 'sse_progress.php',
-                success: function(data) {
-                    debugger;
-                    console.log(data);
-                    document.getElementById('progressor').style.width = data + '%';
-                    document.getElementById('percentage').innerHTML = data + '%';
-                    if(data < 100) {
-                        getProgress();
-                    } else {
-                      //  $("#workingModal").modal('hide');
-                    }
-                },
-                error: function(data) {
-                    console.log(data);
-                }
-            });
-        }
-        $("#workingModal").modal({
-            backdrop: 'static',
-            keyboard: false
-        });
-        $("#workingModal").modal('show');
-        getProgress();     */   
-     //   debugger;
-    //    event.preventDefault();
-    /*    document.getElementById("files").value = JSON.stringify(fileList);
-        $("#removeFiles").submit();*/
     });
-
-// New Progress
-
-
 });
