@@ -39,40 +39,7 @@ $(document).ready(function() {
     $("#uploadFormSubmit").click(function() {
         file = document.getElementById('upload').files;
         var formData = new FormData();
-        // Loop through each of the selected files.
-  //      if(file[0].type.match('*.csv')) {
-            formData.append('xlsfile', file[0]);
-      //      window.alert(file[0].name);
-   //     } else {
-     //       window.alert("Wrong file type");
-    //    }
-        /*for (var i = 0; i < files.length; i++) {
-            var file = files[i];
-
-            // Check the file type.
-            if (!file.type.match('*.csv')) {
-                window.alert("Wrong file type");
-                return;
-            }
-
-            // Add the file to the request.
-            formData.append('xlsfile', file, file.name);
-        }*/
-/*        var xhr = new XMLHttpRequest();
-        xhr.open('POST', 'submitAPI.php', false);
-        xhr.onload = function (data) {
-            if(xhr.status === 200) {
-                // File(s) uploaded.
-                $("#processModal").modal({
-                    backdrop: 'static',
-                    keyboard: false
-                });
-                $("#processModal").modal('show');
-            } else {
-                window.alert('Error');
-            }
-        };
-        xhr.send(formData);*/
+        formData.append('xlsfile', file[0]);
         $.ajax({
             url: 'submitAPI.php',
             type: 'POST',
@@ -94,10 +61,6 @@ $(document).ready(function() {
     $("#articleButton").click(function() {
         window.pollingPeriod = 100;
         window.progressInterval;
-        var fileData = {
-            filesent: file.name
-        }
-      //  debugger;
         $.ajax({
             url: 'processNews.php',
             type: 'POST',
@@ -111,6 +74,7 @@ $(document).ready(function() {
             error: function(data) {
                 clearInterval(window.progressInterval);
                 window.alert('error');
+                console.log(JSON.stringify(data));
             }
         });
         $("#processModal").modal('hide');
@@ -128,39 +92,11 @@ $(document).ready(function() {
                     document.getElementById("progressor").style.width = data.percentComplete + '%';
                 },
                 error: function(data) {
+                 //   debugger;
                     console.log(JSON.stringify(data));
-            //        clearInterval(window.progressInterval);
                 }
             });
-        }
-
-
-
-
-
-
-/*        function getProgress() {
-            $.ajax({
-                url: 'processStatus.php',
-                success: function(data) {
-                    console.log(data);
-                    document.getElementById('progressor').style.width = data + '%';
-                    document.getElementById('percentage').innerHTML = data + '%';
-                    if(data < 100) {
-                        getProgress();
-                    } else {
-                      //  $("#workingModal").modal('hide');
-                    }
-                }
-            });
-        }
-        $("#processModal").modal('hide');        
-        $("#workingModal").modal({
-            backdrop: 'static',
-            keyboard: false
-        });
-        $("#workingModal").modal('show');
-        getProgress();  */      
+        }   
     });
     
     $("#obitButton").click(function() {
@@ -169,36 +105,37 @@ $(document).ready(function() {
             type: 'POST',
             data: {filesent: file[0].name},
             success: function(data) {
+                clearInterval(window.progressInterval);
                 $("#workingModal").modal('hide');
                 $("#successModal").modal('show');
                 loadFileList();
             },
             error: function(data) {
+                clearInterval(window.progressInterval);
                 window.alert('error');
+                console.log(JSON.stringify(data));
             }
         });
-        function getProgress() {
-            $.ajax({
-                url: 'processStatus.php',
-                success: function(data) {
-                    console.log(data);
-                    document.getElementById('progressor').style.width = data + '%';
-                    document.getElementById('percentage').innerHTML = data + '%';
-                    if(data < 100) {
-                        getProgress();
-                    } else {
-                      //  $("#workingModal").modal('hide');
-                    }
-                }
-            });
-        }
-        $("#processModal").modal('hide');        
+        $("#processModal").modal('hide');
         $("#workingModal").modal({
             backdrop: 'static',
             keyboard: false
         });
         $("#workingModal").modal('show');
-        getProgress();        
+        window.progressInterval = setInterval(updateProgress, window.pollingPeriod);
+        function updateProgress() {
+            $.ajax({
+                url: 'progress.json',
+                success: function(data) {
+                    console.log(data.percentComplete + ' complete');
+                    document.getElementById("progressor").style.width = data.percentComplete + '%';
+                },
+                error: function(data) {
+               //     debugger;
+                    console.log(JSON.stringify(data));
+                }
+            });
+        }      
     });
     $("#weddingButton").click(function() {
         $.ajax({
@@ -206,36 +143,37 @@ $(document).ready(function() {
             type: 'POST',
             data: {filesent: file[0].name},
             success: function(data) {
+                clearInterval(window.progressInterval);
                 $("#workingModal").modal('hide');
                 $("#successModal").modal('show');
                 loadFileList();
             },
             error: function(data) {
+                clearInterval(window.progressInterval);
                 window.alert('error');
+                console.log(JSON.stringify(data));
             }
         });
-        function getProgress() {
-            $.ajax({
-                url: 'processStatus.php',
-                success: function(data) {
-                    console.log(data);
-                    document.getElementById('progressor').style.width = data + '%';
-                    document.getElementById('percentage').innerHTML = data + '%';
-                    if(data < 100) {
-                        getProgress();
-                    } else {
-                      //  $("#workingModal").modal('hide');
-                    }
-                }
-            });
-        }
-        $("#processModal").modal('hide');        
+        $("#processModal").modal('hide');
         $("#workingModal").modal({
             backdrop: 'static',
             keyboard: false
         });
         $("#workingModal").modal('show');
-        getProgress();        
+        window.progressInterval = setInterval(updateProgress, window.pollingPeriod);
+        function updateProgress() {
+            $.ajax({
+                url: 'progress.json',
+                success: function(data) {
+                    console.log(data.percentComplete + ' complete');
+                    document.getElementById("progressor").style.width = data.percentComplete + '%';
+                },
+                error: function(data) {
+                //    debugger;
+                    console.log(JSON.stringify(data));
+                }
+            });
+        }   
     });
     $("body").on('click', '#removeFile', function() {
     /*    $('#workingModal').modal('show');
@@ -266,16 +204,38 @@ $(document).ready(function() {
             data: {data: JSON.stringify(deleteList)},
             type: 'POST',
             success: function(data) {
+                clearInterval(window.progressInterval);
                 $("#workingModal").modal('hide');
                 loadFileList();
             },
             error: function(error) {
+                clearInterval(window.progressInterval);
                 $("#workingModal").modal('hide');                
                 window.alert("There was an error");
                 loadFileList();
             }
         });
-        function getProgress() {
+        $("#processModal").modal('hide');
+        $("#workingModal").modal({
+            backdrop: 'static',
+            keyboard: false
+        });
+        $("#workingModal").modal('show');
+        window.progressInterval = setInterval(updateProgress, window.pollingPeriod);
+        function updateProgress() {
+            $.ajax({
+                url: 'progress.json',
+                success: function(data) {
+                    console.log(data.percentComplete + ' complete');
+                    document.getElementById("progressor").style.width = data.percentComplete + '%';
+                },
+                error: function(data) {
+                //    debugger;
+                    console.log(JSON.stringify(data));
+                }
+            });
+        }   
+       /* function getProgress() {
             debugger;
             $.ajax({
                 url: 'sse_progress.php',
@@ -300,7 +260,7 @@ $(document).ready(function() {
             keyboard: false
         });
         $("#workingModal").modal('show');
-        getProgress();        
+        getProgress();     */   
      //   debugger;
     //    event.preventDefault();
     /*    document.getElementById("files").value = JSON.stringify(fileList);

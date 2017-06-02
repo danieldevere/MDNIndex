@@ -1,4 +1,137 @@
 <?php
+
+    set_time_limit(150);
+	file_put_contents('progress.json', json_encode(array('percentComplete'=>0)));
+	$servername = 'localhost';
+	$username = 'root';
+	$password = '';
+	$dbname = 'obits2';
+
+    try{
+        $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+		$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        if(!empty($_POST['data'])) {
+            $files = json_decode($_POST['data']);
+        } else {
+            throw new Exception("Didn't send data");
+        }
+        ini_set('auto_detect_line_endings', TRUE);        
+        $currentPercent = 0.0;
+        $percentPerFile = 100 / count($files);
+        for($j=0;$j<count($files);$j++) {
+            $currentdir = getcwd();
+            $filepath = $currentdir . '/uploads/' . $files[$j]->filename . '.csv';
+            $fileLength = count(file($filepath));
+            $percentPerRow = $percentPerFile / $fileLength;
+            if(($handle = fopen($filepath, "r")) !== FALSE) {
+                if($files[$j]->type == 'Obituary') {
+                    $stmt = $conn->prepare("DELETE FROM Obituaries WHERE lastname=:lastname AND firstname=:firstname AND birthdate=:birthdate AND deathdate=:deathdate AND obitdate=:obitdate AND page=:page");
+                    $stmt->bindParam(':lastname', $lastname);
+                    $stmt->bindParam(':firstname', $firstname);
+                    $stmt->bindParam(':birthdate', $birthdate);
+                    $stmt->bindParam(':deathdate', $deathdate);
+                    $stmt->bindParam(':obitdate', $obitdate);
+                    $stmt->bindParam(':page', $page);
+                    $lastnameReached = false;
+                    while (($data = fgetcsv($handle, ',')) !== FALSE) {
+                        $currentPercent = $currentPercent + $percentPerRow;
+				        $roundedPercent = ceil($currentPercent);
+				        if($roundedPercent % 2 == 0) {
+					        file_put_contents('progress.json', json_encode(array('percentComplete'=>$roundedPercent)));
+				        }
+                        if($lastnameReached && $data[0] != "") {
+                            $lastname = $data[0];
+                            $firstname = $data[1];
+                            $birthdate = date("Y-m-d", strtotime($data[2]));
+                            $deathdate = date("Y-m-d", strtotime($data[3]));
+                            $obitdate = date("Y-m-d", strtotime($data[4]));
+                            $page = $data[5];
+                            $stmt->execute();
+                        }
+                        if(strcasecmp($data[0], 'Last Name')) {
+                            $lastnameReached = true;
+                        }
+                    }
+                } elseif($files[$j]->type == 'Article') {
+                    $stmt = $conn->prepare("DELETE FROM News WHERE subject=:subject AND article=:article AND page=:page AND articledate=:articledate");
+                    $stmt->bindParam(':subject', $subject);
+                    $stmt->bindParam(':article', $article);
+                    $stmt->bindParam(':page', $page);
+                    $stmt->bindParam(':articledate', $articledate);
+                    $subjectReached = false;
+                    while (($data = fgetcsv($handle, ',')) !== FALSE) {
+                        $currentPercent = $currentPercent + $percentPerRow;
+				        $roundedPercent = ceil($currentPercent);
+				        if($roundedPercent % 2 == 0) {
+					        file_put_contents('progress.json', json_encode(array('percentComplete'=>$roundedPercent)));
+				        }
+                        if($subjectReached && $data[0] != "") {
+                            $data[0] = str_replace('-', ' - ', $data[0]);	
+                            $data[0] = str_replace(':', ' : ', $data[0]);
+                            $subject = $data[0];
+                            $article = $data[1];
+                            $page = $data[2];
+                            $articledate = date("Y-m-d", strtotime($data[3]));
+                            $stmt->execute();
+                        }
+                        if(strcasecmp($data[0], 'subject') == 0) {
+                            $subjectReached = true;
+                        }
+                    }
+                } else {
+                    $stmt = $conn->prepare("DELETE FROM Weddings WHERE lastname=:lastname AND firstname=:firstname AND announcement=:announcement AND weddingdate=:weddingdate AND articledate=:articledate AND page=:page");
+                    $stmt->bindParam(':lastname', $lastname);
+                    $stmt->bindParam(':firstname', $firstname);
+                    $stmt->bindParam(':announcement', $announcement);
+                    $stmt->bindParam(':weddingdate', $weddingdate);
+                    $stmt->bindParam(':articledate', $articledate);
+                    $stmt->bindParam(':page', $page);
+                    $lastNameReached = false;
+                    while (($data = fgetcsv($handle, ',')) !== FALSE) {
+                        $currentPercent = $currentPercent + $percentPerRow;
+				        $roundedPercent = ceil($currentPercent);
+				        if($roundedPercent % 2 == 0) {
+					        file_put_contents('progress.json', json_encode(array('percentComplete'=>$roundedPercent)));
+				        }
+                        if($lastNameReached && $data[0] != "") {
+                            $lastname = $data[0];
+                            $firstname = $data[1];
+                            $announcement = $data[2];
+                            $weddingdate = date("Y-m-d", strtotime($data[3]));
+                            $articledate = date("Y-m-d", strtotime($data[4]));
+                            $page = $data[5];
+                            $stmt->execute();
+                        }
+                        if(strcasecmp($data[0], 'last name') == 0) {
+                            $lastNameReached = true;
+                        }
+                    }
+                }
+                fclose($handle);
+                ini_set('auto_detect_line_endings', FALSE);
+                $filestmt = $conn->prepare("DELETE FROM Files WHERE filename = :filename");
+                $filestmt->bindParam(':filename', $filename);
+                $filename = $files[$j]->filename;
+                $filestmt->execute();
+            } else {
+                throw new Exception("There was an error opening the file");
+            }
+        }
+    }
+    catch(PDOException $e) {
+        echo $e->getMessage();
+    }
+    catch(Exception $e) {
+        echo $e->getMessage();
+    }
+
+    /*
+    }
+    $mysqli->close();
+    session_destroy();
+    }
+
+
     session_start();
     $_SESSION['progress'] = 0.0;
     session_write_close();
@@ -25,14 +158,10 @@
             $target = $currentdir . '/uploads/' . $files[$j]->filename . '.csv';
             /*$file = new SplFileObject($target, 'r');
             $file->seek(PHP_INT_MAX);
-            $fileLength = $file->key() + 1;*/
+            $fileLength = $file->key() + 1;
         //    echo $fileLength;
             $fileLength = count(file($target));
             $percentPerRow = $percentPerFile / $fileLength;
-            if($currentPercent != $j * $percentPerFile) {
-                $currentPercent = $j * $percentPerFile;
-            }
-
             if(($handle = fopen($target, "r")) !== FALSE) {
             //    echo 'before prepare';
                 if($files[$j]->type == 'Obituary') {
@@ -146,5 +275,5 @@
     }
     $mysqli->close();
     session_destroy();
-
+*/
 ?>
