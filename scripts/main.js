@@ -8,7 +8,7 @@ $(document).ready(function() {
     loadSessionPrints();
 
     function saveSessionPrints() {
-        debugger;
+      //  debugger;
         var articles = printList.articleList;
         var obits = printList.obituaryList;
         var weddings = printList.weddingList;
@@ -17,28 +17,28 @@ $(document).ready(function() {
             obits: obits,
             weddings: weddings
         };
-        console.log(JSON.stringify(data));
+    //    console.log(JSON.stringify(data));
         $.ajax({
             url: 'printSession.php',
             type: 'POST',
             data: {data: JSON.stringify(data)},
             success: function(data) {
-                debugger;
+          //      debugger;
                 console.log(JSON.stringify(data));
             },
             error: function(error) {
-                debugger;
+          //      debugger;
                 console.log(JSON.stringify(error));
             }
         });
-        debugger;
+   //     debugger;
     }
 
     function loadSessionPrints() {
         $.ajax({
             url: 'printSession.php',
             success: function(data) {
-                debugger;
+             //   debugger;
                 var thisData = JSON.parse(data);
                 if(thisData.hasPrints) {
                     printList = new PrintList();
@@ -186,7 +186,7 @@ $(document).ready(function() {
         removePrintButtonIfNoPrints();
     });
     $("#resultsHere").on('click', '#printAllArticles:enabled', function(){
-        debugger;
+     //   debugger;
         for(x in articleList.list) {
             if(!articleList.list[x].printed()) {
                 printList.articleList.push(articleList.list[x]);
@@ -253,6 +253,9 @@ $(document).ready(function() {
                     items.push(item);
                 }
                 createList();
+            },
+            error: function(error) {
+                console.log(JSON.stringify(error));
             }
         });
     }
@@ -317,7 +320,7 @@ $(document).ready(function() {
                         htmlString += obituary.tableRow(currentRow, false);
                         currentRow++;
                     }
-                    htmlString = obituaryList.tableHead() + htmlString + obituary.tableFoot;
+                    htmlString = obituaryList.tableHead() + htmlString + obituaryList.tableFoot;
                 } else {
                     weddingList = new WeddingList();
                     for(x in data) {
