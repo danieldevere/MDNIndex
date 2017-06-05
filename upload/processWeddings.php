@@ -6,7 +6,7 @@
 	$password = '';
 	$dbname = 'obits2';
 	try{
-		$conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+		$conn = new PDO("mysql:charset=utf8;host=$servername;dbname=$dbname", $username, $password);
 		$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		$stmtFileTable = $conn->prepare("CREATE TABLE IF NOT EXISTS Files (
 			filename VARCHAR(100) NOT NULL,

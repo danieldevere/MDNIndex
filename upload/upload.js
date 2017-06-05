@@ -131,9 +131,11 @@ $(document).ready(function() {
             type: 'POST',
             data: {filesent: file[0].name},
             success: function(data) {
+                debugger;
                 uploadFinished();
             },
             error: function(data) {
+                debugger;
                 clearInterval(window.progressInterval);
                 window.alert('error');
                 console.log(JSON.stringify(data));

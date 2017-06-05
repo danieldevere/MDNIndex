@@ -92,7 +92,7 @@ try {
     $username = "root";
     $password = "";
     $dbname = "Obits2";
-    $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+    $conn = new PDO("mysql:charset=utf8;host=$servername;dbname=$dbname", $username, $password);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     // Construct the prepared search string
     if(isset($subjectString)) {
