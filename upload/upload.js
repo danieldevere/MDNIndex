@@ -41,10 +41,14 @@ $(document).ready(function() {
         clearInterval(window.progressInterval);
         $("#workingModal").modal('hide');
         $("#successModal").modal('show');
+        document.getElementById('uploadForm').reset();
+        
         loadFileList();
     }
 
     function uploadInProgress() {
+        document.getElementById("progressor").style.width = '0%';
+        document.getElementById("percentage").innerHTML = '0%';
         $("#processModal").modal('hide');
         $("#workingModal").modal({
             backdrop: 'static',
@@ -71,26 +75,31 @@ $(document).ready(function() {
     // Events
     $("#uploadFormSubmit").click(function() {
         file = document.getElementById('upload').files;
-        var formData = new FormData();
-        formData.append('xlsfile', file[0]);
-        $.ajax({
-            url: 'submitAPI.php',
-            type: 'POST',
-            data: formData,
-            contentType: false,
-            processData: false,
-            success: function(data) {
-                $("#processModal").modal({
-                    backdrop: 'static',
-                    keyboard: false
-                });
-                $("#processModal").modal('show');
-                document.getElementById("processName").innerHTML = file[0].name;
-            },
-            error: function(data) {
-                window.alert(JSON.stringify(data));
-            }
-        });
+        if(file[0]) {
+            var formData = new FormData();
+            formData.append('xlsfile', file[0]);
+            $.ajax({
+                url: 'submitAPI.php',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(data) {
+                    $("#processModal").modal({
+                        backdrop: 'static',
+                        keyboard: false
+                    });
+                    $("#processModal").modal('show');
+                    document.getElementById("processName").innerHTML = file[0].name;
+                },
+                error: function(data) {
+                    window.alert(JSON.stringify(data));
+                }
+            });
+        } else {
+            window.alert("No file chosen");
+        }
+        
     });
     $("#articleButton").click(function() {
         $.ajax({
@@ -161,6 +170,7 @@ $(document).ready(function() {
             success: function(data) {
                 clearInterval(window.progressInterval);
                 $("#workingModal").modal('hide');
+                $("#successModal").modal('show');
                 loadFileList();
             },
             error: function(error) {
@@ -170,26 +180,6 @@ $(document).ready(function() {
                 loadFileList();
             }
         });
-        $("#processModal").modal('hide');
-        $("#workingModal").modal({
-            backdrop: 'static',
-            keyboard: false
-        });
-        $("#workingModal").modal('show');
-        window.progressInterval = setInterval(updateProgress, window.pollingPeriod);
-        function updateProgress() {
-            $.ajax({
-                url: 'progress.json',
-                success: function(data) {
-                    console.log(data.percentComplete + ' complete');
-                    document.getElementById("progressor").style.width = data.percentComplete + '%';
-                    document.getElementById("percentage").innerHTML = data.percentComplete + '%';                    
-                },
-                error: function(data) {
-                //    debugger;
-                    console.log(JSON.stringify(data));
-                }
-            });
-        }   
+        uploadInProgress();
     });
 });

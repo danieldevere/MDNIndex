@@ -1,4 +1,5 @@
 <?php
+    header("Cache-Control: no-cache, must-revalidate");
     $mysqli = mysqli_connect('localhost', 'root', '', 'obits2');
     if($mysqli->connect_errno) {
         echo "Connect failed" . $mysqli->connect_error;

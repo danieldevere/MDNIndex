@@ -291,21 +291,29 @@ class PDF_AutoPrint extends PDF_JavaScript
 
 
 if(isset($header) && isset($data)) {
-    $pdf = new PDF_AutoPrint();
+    $pdf = new PDF_AutoPrint('P', 'mm', 'letter');
+    $pdf->SetLeftMargin(17.0);
     $pdf->SetFont('Arial','',14);
+    $pdf->AddPage();
     if(isset($articles) && count($articles) > 0) {
         $header = array('Subject', 'Headline', 'Date', 'Page');        
-        $pdf->AddPage();
+     //   $pdf->AddPage();
         $pdf->NewsIndexTable($header, $articles);        
     }
     if(isset($obituaries) && count($obituaries) > 0) {
+        if(!empty($articles)) {
+            $pdf->Ln();
+        }
         $header = array('Last Name', 'First Name', 'Birth Date', 'Death Date', 'Obituary Date', 'Page');        
-        $pdf->AddPage();
+     //   $pdf->AddPage();
         $pdf->ObituaryIndexTable($header, $obituaries);
     }
     if(isset($weddings) && count($weddings) > 0) {
+        if(!empty($articles) || !empty($obituaries)) {
+            $pdf->Ln();
+        }
         $header = array('Last Name', 'First Name', 'Announcement', 'Wedding Date', 'Article Date', 'Page');
-        $pdf->AddPage();
+     //   $pdf->AddPage();
         $pdf->WeddingIndexTable($header, $weddings);
     }
     $pdf->AutoPrint();

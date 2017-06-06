@@ -579,12 +579,15 @@ $(document).ready(function() {
             }
         }
         this.sortLists = function() {
+            debugger;
             this.articleList.sort(sortArticles);
             this.weddingList.sort(sortPersonal);
             this.obituaryList.sort(sortPersonal);
             function sortArticles(a, b) {
                 if(a.subject.toUpperCase() == b.subject.toUpperCase()) {
-                    if(a.date < a.date) {
+                    var date1 = new Date(a.date);
+                    var date2 = new Date(b.date);
+                    if(date1 < date2) {
                         return -1;
                     } else {
                         return 1;
