@@ -153,6 +153,7 @@ $(document).ready(function() {
         uploadInProgress();  
     });
     $("#removeButton").click(function() {
+        debugger;
         var deleteList = [];
         var list = $('#removeFile:checked').map(function() {
             return $(this).data('id');
@@ -168,6 +169,7 @@ $(document).ready(function() {
             data: {data: JSON.stringify(deleteList)},
             type: 'POST',
             success: function(data) {
+                debugger;
                 clearInterval(window.progressInterval);
                 $("#workingModal").modal('hide');
                 $("#successModal").modal('show');

@@ -68,6 +68,7 @@
                         if($subjectReached && $data[0] != "") {
                             $data[0] = str_replace('-', ' - ', $data[0]);	
                             $data[0] = str_replace(':', ' : ', $data[0]);
+                            $data[1] = str_replace('...', ' ', $data[1]);
                             $subject = $data[0];
                             $article = $data[1];
                             $page = $data[2];
@@ -119,7 +120,7 @@
         }
     }
     catch(PDOException $e) {
-        echo $e->getMessage();
+        echo 'mySQL error: ' . $e->getMessage();
     }
     catch(Exception $e) {
         echo $e->getMessage();

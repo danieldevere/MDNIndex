@@ -7,8 +7,8 @@ $(document).ready(function() {
     var items = [];
     loadSessionPrints();
 
+    // Print
     function saveSessionPrints() {
-      //  debugger;
         var articles = printList.articleList;
         var obits = printList.obituaryList;
         var weddings = printList.weddingList;
@@ -17,28 +17,22 @@ $(document).ready(function() {
             obits: obits,
             weddings: weddings
         };
-    //    console.log(JSON.stringify(data));
         $.ajax({
             url: 'printSession.php',
             type: 'POST',
             data: {data: JSON.stringify(data)},
             success: function(data) {
-          //      debugger;
                 console.log(JSON.stringify(data));
             },
             error: function(error) {
-          //      debugger;
                 console.log(JSON.stringify(error));
             }
         });
-   //     debugger;
     }
-
     function loadSessionPrints() {
         $.ajax({
             url: 'printSession.php',
             success: function(data) {
-             //   debugger;
                 var thisData = JSON.parse(data);
                 if(thisData.hasPrints) {
                     printList = new PrintList();
@@ -66,7 +60,6 @@ $(document).ready(function() {
             }
         });
     }
-    // Print
     $("body").on('click', '#printButton', function() {
         if(printList.hasItems) {
             var articleDataTest = [
@@ -77,7 +70,6 @@ $(document).ready(function() {
                     page: 'A1'
                 }
             ];
-        //    debugger;
             printList.sortLists();
             document.getElementById("articleData").value = JSON.stringify(printList.articleList);
             document.getElementById("obituaryData").value = JSON.stringify(printList.obituaryList);
@@ -86,9 +78,7 @@ $(document).ready(function() {
         }
     });
     function loadPrints() {
-     //   debugger;
         htmlString = '<button type="button" style="float:left;" class="btn btn-success" id="printButton">Print</button>';
-        // Articles
         if(printList.articleList.length > 0) {
             htmlString += '<h2 class="text-center">Articles</h2>'
             htmlString += '<table class="table"><thead><tr><th>No.</th><th>Subject</th><th>Headline</th><th>Date</th><th>Page</th><th><button type="button" class="btn btn-primary btn-xs" id="removeAllPrints">Remove All</button></th></thead><tbody>';
@@ -174,7 +164,6 @@ $(document).ready(function() {
         removePrintButtonIfNoPrints();
     });
     $("#resultsHere").on('click', '#printAllObits:enabled', function(){
-    //    debugger;
         for(x in obituaryList.list) {
             if(!obituaryList.list[x].printed()) {
                 printList.obituaryList.push(obituaryList.list[x]);
@@ -186,7 +175,6 @@ $(document).ready(function() {
         removePrintButtonIfNoPrints();
     });
     $("#resultsHere").on('click', '#printAllArticles:enabled', function(){
-     //   debugger;
         for(x in articleList.list) {
             if(!articleList.list[x].printed()) {
                 printList.articleList.push(articleList.list[x]);
@@ -208,7 +196,8 @@ $(document).ready(function() {
         saveSessionPrints(); 
         removePrintButtonIfNoPrints();     
     });
-    // Subject Search
+
+    // Subjects
     function search(searchterm) {
         var searched = items.filter(findElement);
         $("#notSelected").find(".subjectItem").hide();
@@ -397,7 +386,7 @@ $(document).ready(function() {
     });
     
     
-
+// Classes
 
 // Obituary Class
     function Obituary(lastname, firstname, birthdate, deathdate, obitdate, page, id) {
@@ -454,6 +443,64 @@ $(document).ready(function() {
             }
             var string = '<tr><td>' + currentRow + '</td><td>' + this.lastname + '</td><td>' + this.firstname + '</td><td>' + this.announcement + '</td><td>' + this.weddingdate + '</td><td>' + this.articledate + '</td><td>' + this.page + '</td><td>' + printButton + '</td></tr>';
             return string;          
+        }
+    }
+    // Article Class
+    function Article(subject, headline, date, page, id) {
+        this.type = 'article';
+        this.subject = subject;
+        this.headline = headline;
+        this.date = date;
+        this.page = page;
+        this.printed = function() {
+            return printList.isPrinting(this.type, this.id);
+        }
+        this.index = -1;
+        this.id = id;
+        this.tableRow = function(currentRow, printQueue) {
+            var disabled = '';
+            if(this.printed()) {
+                disabled = 'disabled';
+            }
+            if(printQueue) {
+                var printButton = '<button type="button" class="removePrint btn btn-default btn-xs" data-id="' + this.id + '" data-type="article" id="' + this.index + '">Remove</button>';
+            } else {
+                var printButton = '<button type="button" class="print btn btn-default btn-xs ' + disabled + '" data-id="' + this.id + '" data-type="article" id="' + this.index + '">Add to Print</button>';
+            }
+            var subjectName = this.subject;
+            if(subjectName.length > 20) {
+                subjectName = subjectName.substring(0,19) + '...';
+            }
+            var articleName = this.headline;
+            if(articleName.length > 50) {
+                articleName = articleName.substring(0, 49) + '...';
+            }
+            
+            var string = '<tr><td>' + currentRow + '</td><td>' + subjectName + '</td><td>' + articleName + '</td><td>' + this.date + '</td><td>' + this.page + '</td><td>' + printButton + '</td></tr>';
+            return string;
+        }
+    }
+     // Article List class
+    function ArticleList() {
+        this.list = [];
+        this.headers = ['Subject', 'Headline', 'Date', 'Page'];
+        this.tableHead = function() {
+            var string = '<p>' + this.list.length.toLocaleString('en') + ' Results</p><table class="table tablesorter" id="myTable"><thead><tr><th class="sort"> No.</th><th class="sort"> Subject</th><th class="sort"> Headline</th><th class="sort"> Date</th><th class="sort"> Page</th><td class="sorter-false"><button type="button" id="printAllArticles" class="btn btn-primary btn-xs">Print All</button></td></tr></thead><tbody>';
+            return string;
+        }
+        this.tableFoot = '</tbody></table>';
+        this.addItem = function(item) {
+            item.index = this.list.length;
+            this.list.push(item);
+        }
+    }
+        function Item(subject, id) {
+        this.subject = subject;
+        this.id = id;
+        this.added = false;
+        this.card = function() {
+            var string = '<span class="label subjectItem" id="' + this.id + '" data-subject="' + this.subject + '">' + this.subject + '</span>';
+            return string;
         }
     }
      // Obituary List class
@@ -542,7 +589,6 @@ $(document).ready(function() {
             this.weddingList = [];
         }
         this.isPrinting = function(type, item) {
-          //  debugger;
             if(type == 'article') {
                 if(this.articleList.length > 0) {
                     if(this.articleList.findIndex(findItem) != -1) {
@@ -618,63 +664,6 @@ $(document).ready(function() {
         }
     }
 
-    // Article Class
-    function Article(subject, headline, date, page, id) {
-        this.type = 'article';
-        this.subject = subject;
-        this.headline = headline;
-        this.date = date;
-        this.page = page;
-        this.printed = function() {
-            return printList.isPrinting(this.type, this.id);
-        }
-        this.index = -1;
-        this.id = id;
-        this.tableRow = function(currentRow, printQueue) {
-            var disabled = '';
-            if(this.printed()) {
-                disabled = 'disabled';
-            }
-            if(printQueue) {
-                var printButton = '<button type="button" class="removePrint btn btn-default btn-xs" data-id="' + this.id + '" data-type="article" id="' + this.index + '">Remove</button>';
-            } else {
-                var printButton = '<button type="button" class="print btn btn-default btn-xs ' + disabled + '" data-id="' + this.id + '" data-type="article" id="' + this.index + '">Add to Print</button>';
-            }
-            var subjectName = this.subject;
-            if(subjectName.length > 20) {
-                subjectName = subjectName.substring(0,19) + '...';
-            }
-            var articleName = this.headline;
-            if(articleName.length > 50) {
-                articleName = articleName.substring(0, 49) + '...';
-            }
-            
-            var string = '<tr><td>' + currentRow + '</td><td>' + subjectName + '</td><td>' + articleName + '</td><td>' + this.date + '</td><td>' + this.page + '</td><td>' + printButton + '</td></tr>';
-            return string;
-        }
-    }
-     // Article List class
-    function ArticleList() {
-        this.list = [];
-        this.headers = ['Subject', 'Headline', 'Date', 'Page'];
-        this.tableHead = function() {
-            var string = '<p>' + this.list.length.toLocaleString('en') + ' Results</p><table class="table tablesorter" id="myTable"><thead><tr><th class="sort"> No.</th><th class="sort"> Subject</th><th class="sort"> Headline</th><th class="sort"> Date</th><th class="sort"> Page</th><td class="sorter-false"><button type="button" id="printAllArticles" class="btn btn-primary btn-xs">Print All</button></td></tr></thead><tbody>';
-            return string;
-        }
-        this.tableFoot = '</tbody></table>';
-        this.addItem = function(item) {
-            item.index = this.list.length;
-            this.list.push(item);
-        }
-    }
-        function Item(subject, id) {
-        this.subject = subject;
-        this.id = id;
-        this.added = false;
-        this.card = function() {
-            var string = '<span class="label subjectItem" id="' + this.id + '" data-subject="' + this.subject + '">' + this.subject + '</span>';
-            return string;
-        }
-    }
+
 
 });
