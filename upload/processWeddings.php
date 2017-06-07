@@ -87,7 +87,10 @@
 		$stmtFileInsert->bindParam(':type', $type);
 		$filename = basename($file, '.csv');
 		$type = "Weddings-Anniversaries";
-		$stmtFileInsert->execute();
+		if($lastNameReached) {
+			$stmtFileInsert->execute();
+		}
+
 	}
 	catch(PDOException $e) {
 		echo $e->getMessage();

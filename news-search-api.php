@@ -104,6 +104,7 @@ try {
     if(isset($dateString)) {
         $searchString .= $dateString;
     }
+    $searchString .= ' ORDER BY subject, articledate ASC';
     $stmt = $conn->prepare($searchString);
     // Bind subjects
     if(isset($subjectString)) {

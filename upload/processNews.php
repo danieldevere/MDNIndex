@@ -60,14 +60,21 @@
 					$article = $data[1];
 					$page = $data[2];
 					$articledate = date("Y-m-d", strtotime($data[3]));
+
 					$stmtInsert->execute();
 				}
-				if(strcasecmp($data[0], 'subject') == 0) {
+			//	echo $data[0];
+				if(strcasecmp(str_replace('"', "", $data[0]), 'subject') == 0) {
+				//	echo 'subject reached';
 					$subjectReached = true;
 				}
 				$count++;
 			}
 			fclose($handle);
+		//	echo $count;
+			if(!$subjectReached) {
+				throw new Exception("Subject wasn't reached");
+			}
 		} else {
 			throw new Exception("There was an error opening the file");
 		}

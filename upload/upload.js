@@ -15,7 +15,7 @@ $(document).ready(function() {
     // Globals
     var fileList = [];
     var file;
-    window.pollingPeriod = 200;
+    window.pollingPeriod = 500;
     window.progressInterval;
     // Load file list
     loadFileList();
@@ -39,23 +39,40 @@ $(document).ready(function() {
 
     function uploadFinished() {
         clearInterval(window.progressInterval);
-        $("#workingModal").modal('hide');
-        $("#successModal").modal('show');
+   //     $("#workingModal").modal('hide');
+     //   $("#successModal").modal('show');
         document.getElementById('uploadForm').reset();
-        
+        $("#progressor").addClass('notransition');
+        $("#progressor").width(0);
         loadFileList();
     }
 
-    function uploadInProgress() {
-        document.getElementById("progressor").style.width = '0%';
-        document.getElementById("percentage").innerHTML = '0%';
-        $("#processModal").modal('hide');
-        $("#workingModal").modal({
+    function uploadInProgress(year, type) {
+      //  $("#workingModal").modal('hide');
+      debugger;
+      
+      
+    //    document.getElementById('progressor').width = '0%';
+
+            document.getElementById("percentage").innerHTML = '0%';
+            document.getElementById('workingTitle').innerHTML = year + ' ' + type;
+            setTimeout(function(){
+                window.progressInterval = setInterval(updateProgress, window.pollingPeriod);
+                $("#progressor").removeClass('notransition');
+            },100);
+                
+       // $("#progressor").width('0%');
+      //  document.getElementById("progressor").style.width = '0%';
+   //     document.getElementById("percentage").innerHTML = '0%';
+      //  $("#processModal").modal('hide');
+ //       document.getElementById('workingTitle').innerHTML = year + ' ' + type;
+/*        $("#workingModal").modal({
             backdrop: 'static',
             keyboard: false
         });
-        $("#workingModal").modal('show');
-        window.progressInterval = setInterval(updateProgress, window.pollingPeriod);
+        $("#workingModal").modal('show');*/
+  //      window.progressInterval = setInterval(updateProgress, window.pollingPeriod);
+   //  $("#progressor").removeClass("notransition");        
     }
 
     function updateProgress() {
@@ -78,6 +95,7 @@ $(document).ready(function() {
         if(file[0]) {
             var formData = new FormData();
             formData.append('xlsfile', file[0]);
+            formData.append('year', $('#year').val());
             $.ajax({
                 url: 'submitAPI.php',
                 type: 'POST',
@@ -85,22 +103,106 @@ $(document).ready(function() {
                 contentType: false,
                 processData: false,
                 success: function(data) {
-                    $("#processModal").modal({
+                    debugger;
+
+                    /*$("#processModal").modal({
                         backdrop: 'static',
                         keyboard: false
-                    });
-                    $("#processModal").modal('show');
-                    document.getElementById("processName").innerHTML = file[0].name;
+                    });*/
+                    processFiles($("#year").val());
+                    /*$("#processModal").modal('show');
+                    document.getElementById("processName").innerHTML = file[0].name;*/
                 },
                 error: function(data) {
                     window.alert(JSON.stringify(data));
                 }
             });
+            document.getElementById("progressor").style.width = '0%';
+            document.getElementById("percentage").innerHTML = '0%';
+            document.getElementById('workingTitle').innerHTML = 'Uploading File';
+            $("#workingModal").modal({
+                backdrop: 'static',
+                keyboard: false
+            });
+            $("#workingModal").modal('show');
         } else {
             window.alert("No file chosen");
         }
         
     });
+    var articlesFinished = false;
+    var weddingsFinished = false;
+    var obitsFinished = false;
+    function processFiles(year) {
+
+        debugger;
+        $.ajax({
+            url: 'processNews.php',
+            type: 'POST',
+            data: {filesent: year + '/articles' + year + '.csv'},
+            success: function(data) {
+                debugger;
+                uploadFinished();
+            //   articlesFinished = true;
+            //    finished();
+                $.ajax({
+                    url: 'process.php',
+                    type: 'POST',
+                    data: {filesent: year + '/obituaries' + year + '.csv'},
+                    success: function(data) {
+                        debugger;
+                        uploadFinished();
+                      //  obitsFinished = true;
+                     //   finished();
+                        $.ajax({
+                            url: 'processWeddings.php',
+                            type: 'POST',
+                            data: {filesent: year + '/weddings-anniversaries' + year + '.csv'},
+                            success: function(data) {
+                                debugger;
+                                uploadFinished();
+                                $("#workingModal").modal('hide');
+                                $("#successModal").modal('show');
+                            //    weddingsFinished = true;
+                            //    finished();
+                            },
+                            error: function(data) {
+                                debugger;
+                                clearInterval(window.progressInterval);
+                                window.alert('error');
+                                console.log(JSON.stringify(data));
+                            }
+                        });
+                        uploadInProgress(year, 'Weddings-Anniversaries');  
+                    },
+                    error: function(data) {
+                        clearInterval(window.progressInterval);
+                        window.alert('error');
+                        console.log(JSON.stringify(data));
+                    }
+                });
+                uploadInProgress(year, 'Obituaries');
+            },
+            error: function(data) {
+                clearInterval(window.progressInterval);
+                window.alert('error');
+                console.log(JSON.stringify(data));
+            }
+        });
+        uploadInProgress(year, 'Articles');
+        $("#workingModal").modal('show');
+        
+        
+    }
+    function finished() {
+        if(articlesFinished && obitsFinished && weddingsFinished) {
+            $("#workingModal").modal('hide');
+            $("#successModal").modal('show');
+            articlesFinished = false;
+            weddingsFinished = false;
+            obitsFinished = false;
+        }
+    }
     $("#articleButton").click(function() {
         $.ajax({
             url: 'processNews.php',

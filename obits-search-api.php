@@ -49,6 +49,7 @@ function sanitizeInput($input) {
             if(isset($firstname) && $firstname != "") {
                 $searchString .= " AND (firstname LIKE :firstname0 OR firstname LIKE :firstname1)";
             }
+            $searchString .= " ORDER BY lastname, firstname ASC";
         } else {
             echo "Last Name field must not be empty";
         }
