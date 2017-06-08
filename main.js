@@ -6,7 +6,7 @@ $(document).ready(function() {
     var printList = new PrintList();
     var items = [];
     loadSessionPrints();
-
+    
     // Print
     function saveSessionPrints() {
         var articles = printList.articleList;
@@ -33,6 +33,7 @@ $(document).ready(function() {
         $.ajax({
             url: 'printSession.php',
             success: function(data) {
+                debugger;
                 var thisData = JSON.parse(data);
                 if(thisData.hasPrints) {
                     printList = new PrintList();
@@ -51,11 +52,14 @@ $(document).ready(function() {
                         var wedding = new Wedding(item.lastname, item.firstname, item.announcement, item.weddingdate, item.articledate, item.page, item.id);
                         printList.addPrint(wedding);
                     }
+                    $("#printButton").show();
                 } else {
                     printList = new PrintList();
+                    $("#printButton").hide();
                 }
             },
             error: function(error) {
+
                 console.log(JSON.stringify(error));
             }
         });
@@ -81,7 +85,7 @@ $(document).ready(function() {
         htmlString = '<button type="button" style="float:left;" class="btn btn-success" id="printButton">Print</button>';
         if(printList.articleList.length > 0) {
             htmlString += '<h2 class="text-center">Articles</h2>'
-            htmlString += '<table class="table"><thead><tr><th>No.</th><th>Subject</th><th>Headline</th><th>Date</th><th>Page</th><th><button type="button" class="btn btn-primary btn-xs" id="removeAllPrints">Remove All</button></th></thead><tbody>';
+            htmlString += '<table class="table"><thead><tr><th>No.</th><th>Subject</th><th>Headline</th><th>Date</th><th>Page</th><th><button type="button" class="btn btn-primary btn-xs" id="removeAllArticlePrints">Remove All</button></th></thead><tbody>';
             var currentRow = 1;
             for(x in printList.articleList) {
                 htmlString += printList.articleList[x].tableRow(currentRow, true);
@@ -129,7 +133,13 @@ $(document).ready(function() {
         saveSessionPrints();
         removePrintButtonIfNoPrints();
     });
-    $("#printsHere").on('click', '#removeAllPrints', function() {
+    $("#clearPrints").click(function() {
+        printList.clearPrints();
+        loadPrints();
+        saveSessionPrints();
+        removePrintButtonIfNoPrints();
+    });
+    $("#printsHere").on('click', '#removeAllArticlePrints', function() {
         printList.articleList = [];
         loadPrints();
         saveSessionPrints();

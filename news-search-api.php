@@ -54,10 +54,15 @@ try {
         if($headline != "") {
             $headlineString = "";
             if(isset($subjectString)) {
-                $headlineString .= " AND article LIKE :article";
+                $headlineString .= " AND (article LIKE :article0";
             } else {
-                $headlineString .= "article LIKE :article";
+                $headlineString .= "(article LIKE :article0";
             }
+            $headline = explode(' ', $headline);
+            for($i=1; $i<count($headline); $i++) {
+                $headlineString .= ' AND article LIKE :article' . $i;
+            }
+            $headlineString .= ')';
         }
     }
     // Check for from and to dates and add to separate from and to date strings
@@ -114,8 +119,10 @@ try {
     }
     // Bind headline
     if(isset($headlineString)) {
-        $headline = "%" . $headline . "%";
-        $stmt->bindParam(':article', $headline);
+        for($i=0; $i<count($headline); $i++) {
+            $headline[$i] = "%" . $headline[$i] . "%";
+            $stmt->bindParam(':article' . $i, $headline[$i]);
+        }
     }
     // Bind dates
     if(isset($dateString)) {

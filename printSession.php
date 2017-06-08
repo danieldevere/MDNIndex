@@ -6,7 +6,7 @@ try{
         $_SESSION['prints'] = $prints;
         echo 'Added to session';
     } else {
-        if(!empty($_SESSION['prints'])) {
+        if(!empty($_SESSION['prints']['articles']) || !empty($_SESSION['prints']['obits']) || !empty($_SESSION['prints']['weddings'])) {
             $prints = $_SESSION['prints'];
             echo json_encode(array('hasPrints'=>true, 'articles'=>$prints['articles'], 'obits'=>$prints['obits'], 'weddings'=>$prints['weddings']));
         } else {
