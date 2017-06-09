@@ -1,4 +1,9 @@
 $(document).ready(function() {
+    if(sessionStorage.searchTerms) {
+        debugger;
+        var searchTerms = JSON.parse(sessionStorage.searchTerms);
+        articleAjax(searchTerms);
+    }
     // Global Construction
     var articleList = new ArticleList();
     var obituaryList = new ObituaryList();
@@ -33,7 +38,7 @@ $(document).ready(function() {
         $.ajax({
             url: 'printSession.php',
             success: function(data) {
-                debugger;
+              //  debugger;
                 var thisData = JSON.parse(data);
                 if(thisData.hasPrints) {
                     printList = new PrintList();
@@ -207,6 +212,11 @@ $(document).ready(function() {
         removePrintButtonIfNoPrints();     
     });
 
+    $("#resultsArea").on('click', '#backToSearch', function() {
+        $("#resultsArea").hide();
+        $("#searchForms").show();
+    });
+
     // Subjects
     function search(searchterm) {
         var searched = items.filter(findElement);
@@ -339,6 +349,30 @@ $(document).ready(function() {
             }
         });
     });
+    window.onpopstate = function(e){
+        debugger;
+        var pathArray = e.target.location.pathname.split('/');
+        if(pathArray.length == 4) {
+            var search = pathArray[3].substring(1);
+            var searchTerms = JSON.parse(decodeURIComponent(search));
+         //   searchTerms.subjects = JSON.stringify(searchTerms.subjects);
+            articleAjax(searchTerms);
+        }
+        if(e.target.location.pathname == '/obits/'){
+            $("#resultsArea").hide();
+            $("#searchForms").show();
+        //    document.title = e.state.pageTitle;
+        } else {
+            $("#searchForms").hide();
+            $("#resultsArea").show();
+        }
+    };
+    $(window).on('load', function() {
+        debugger;
+    });
+/*    window.onbeforeunload = function(e) {
+        return "Are you sure?";
+    }*/
     // Article Search
     $("#articleSearch").submit(function(event) {
         event.preventDefault();
@@ -363,11 +397,15 @@ $(document).ready(function() {
             fromDate: fromDate,
             toDate: toDate
         };
+        articleAjax(thisData);
+        
+    });
+    function articleAjax(searchData) {
         $.ajax({
             type: 'GET',
             url: 'news-search-api.php',
             dataType: 'json',
-            data: thisData,
+            data: searchData,
             success: function(data) {
                 articleList = new ArticleList();
                 var htmlString = '';
@@ -379,8 +417,15 @@ $(document).ready(function() {
                     currentRow++;
                 }
                 htmlString = articleList.tableHead() + htmlString + articleList.tableFoot;
-                document.getElementById("resultsHere").innerHTML = htmlString;
-                $("#resultsModal").modal('show');
+                document.getElementById("resultsArea").innerHTML = htmlString;
+              //  document.title = response.pageTitle;
+                if(window.location.pathname == '/obits/') {
+                    window.history.pushState({"html":htmlString,"pageTitle":'Article Search Results'},"", window.location.href);
+                }
+                sessionStorage.searchTerms = JSON.stringify(searchData);
+                $("#searchForms").hide();
+                $("#resultsArea").show();
+             //   $("#resultsModal").modal('show');
                 $("#myTable").tablesorter({
                     headers: {
                         '.printAll' : {
@@ -393,7 +438,7 @@ $(document).ready(function() {
                 window.alert(error.responseText);
             }
         });
-    });
+    }
     
     
 // Classes
@@ -495,7 +540,7 @@ $(document).ready(function() {
         this.list = [];
         this.headers = ['Subject', 'Headline', 'Date', 'Page'];
         this.tableHead = function() {
-            var string = '<p>' + this.list.length.toLocaleString('en') + ' Results</p><table class="table tablesorter" id="myTable"><thead><tr><th class="sort"> No.</th><th class="sort"> Subject</th><th class="sort"> Headline</th><th class="sort"> Date</th><th class="sort"> Page</th><td class="sorter-false"><button type="button" id="printAllArticles" class="btn btn-primary btn-xs">Print All</button></td></tr></thead><tbody>';
+            var string = '<a href="#" id="backToSearch">Back</a><h3 class="text-center">Article Search Results</h3><p>' + this.list.length.toLocaleString('en') + ' Results</p><table class="table tablesorter" id="myTable"><thead><tr><th class="sort"> No.</th><th class="sort"> Subject</th><th class="sort"> Headline</th><th class="sort"> Date</th><th class="sort"> Page</th><td class="sorter-false"><button type="button" id="printAllArticles" class="btn btn-primary btn-xs">Print All</button></td></tr></thead><tbody>';
             return string;
         }
         this.tableFoot = '</tbody></table>';
@@ -518,7 +563,7 @@ $(document).ready(function() {
         this.list = [];
         this.headers = ['Last Name', 'First Name', 'Birth Date', 'Death Date', 'Obituary Date', 'Page'];
         this.tableHead = function() {
-            var string = '<p>' + this.list.length.toLocaleString('en') + ' Results</p><table class="table tablesorter" id="myTable"><thead><tr><th class="sort"> No.</th><th class="sort"> Last Name</th><th class="sort"> First Name</th><th class="sort"> Birth Date</th><th class="sort"> Death Date</th><th class="sort"> Obituary Date</th><th> Page</th><td class="sorter-false"><button type="button" id="printAllObits" class="btn btn-primary btn-xs">Print All</button></td></tr></thead><tbody>';
+            var string = '<h3 class="text-center">Obituary Search Results</h3><p>' + this.list.length.toLocaleString('en') + ' Results</p><table class="table tablesorter" id="myTable"><thead><tr><th class="sort"> No.</th><th class="sort"> Last Name</th><th class="sort"> First Name</th><th class="sort"> Birth Date</th><th class="sort"> Death Date</th><th class="sort"> Obituary Date</th><th> Page</th><td class="sorter-false"><button type="button" id="printAllObits" class="btn btn-primary btn-xs">Print All</button></td></tr></thead><tbody>';
             return string;                     
         }
         this.tableFoot = '</tbody></table>';
@@ -532,7 +577,7 @@ $(document).ready(function() {
         this.list = [];
         this.headers = ['Last Name', 'First Name', 'Announcement', 'Wedding Date', 'Article Date', 'Page'];
         this.tableHead = function() {
-            var string = '<p>' + this.list.length.toLocaleString('en') + ' Results</p><table class="table tablesorter" id="myTable"><thead><tr><th class="sort"> No.</th><th class="sort"> Last Name</th><th class="sort"> First Name</th><th class="sort"> Announcement</th><th class="sort"> Wedding Date</th><th> Article Date</th><th> Page</th><td class="sorter-false"><button type="button" class="btn btn-primary btn-xs" id="printAllWeddings">Print All</button></td></tr></thead><tbody>';
+            var string = '<h3 class="text-center">Wedding/Anniversary Search Results</h3><p>' + this.list.length.toLocaleString('en') + ' Results</p><table class="table tablesorter" id="myTable"><thead><tr><th class="sort"> No.</th><th class="sort"> Last Name</th><th class="sort"> First Name</th><th class="sort"> Announcement</th><th class="sort"> Wedding Date</th><th> Article Date</th><th> Page</th><td class="sorter-false"><button type="button" class="btn btn-primary btn-xs" id="printAllWeddings">Print All</button></td></tr></thead><tbody>';
             return string;       
         }
         this.tableFoot = '</tbody></table>';
